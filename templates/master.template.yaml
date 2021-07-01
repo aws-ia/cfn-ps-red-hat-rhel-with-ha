@@ -1,0 +1,20 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Description:
+  This template creates the VPC and workload as nested stacks.
+
+Parameters:
+  set of parameters
+
+Mappings:
+  set of mappings
+
+Conditions:
+  set of conditions
+
+Resources:
+  set of resources
+
+Outputs:
+  set of outputs
