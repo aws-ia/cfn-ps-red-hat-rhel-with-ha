@@ -65,7 +65,7 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.64.0/19
-    Description: CIDR block for private subnet 2 located in Availability Zone 3
+    Description: CIDR block for private subnet 3 located in Availability Zone 3
     Type: String
   VPCCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
@@ -94,7 +94,6 @@ Parameters:
       - 'RHEL7HA'
       - 'RHEL8HA'
     ConstraintDescription: The QuickStart supports only RHEL7 and RHEL8
-    Default: 'RHEL8HA'
     Description: Version of RHEL with HA OS to use for the node instances
     Type: String
 Conditions:
@@ -120,3 +119,43 @@ Resources:
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
         PrivatSubnet3ACIDR: !Ref PrivateSubnet3CIDR
         VPCCIDR: !Ref VPCCIDR
+  Node1Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node1.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetID: #ask david
+        NodeOS: !Ref NodeOS
+  Node2Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node2.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetID: #ask david
+        NodeOS: !Ref NodeOS
+  Node3Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node3.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetID: #ask david
+        NodeOS: !Ref NodeOS
+

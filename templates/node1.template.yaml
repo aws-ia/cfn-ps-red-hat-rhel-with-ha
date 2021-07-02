@@ -1,0 +1,33 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template sets up RHEL with HA in Node 1 of the cluster.
+Parameters:
+  KeyPairName:
+    ConstraintDescription: "Name of an existing EC2 KeyPair."
+    Type: "AWS::EC2::KeyPair::KeyName"
+  InstanceType:
+    Default: t2.medium
+    Description: "EC2 instance type"
+    Type: String
+  SubnetID:
+    Description: "Identifer of subnet the instance resides in"
+    Type: AWS::EC2::Subnet::Id
+  NodeOS:
+    AllowedValues:
+      - 'RHEL7HA'
+      - 'RHEL8HA'
+    ConstraintDescription: The QuickStart supports only RHEL7 and RHEL8
+    Description: Version of RHEL with HA OS to use for the node instances
+    Type: String
+Mappings:
+  RHELwithHAAMI:
+    RHEL7HA: 
+    RHEl8HA:
+Resources:
+  RHELwithHAInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: !Ref KeyPairName
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref SubnetId
+      ImageId: #ask david
