@@ -1,0 +1,18 @@
+---
+project:
+  owner: baechans@amazon.com
+  name: quickstart-rhel-with-ha
+  regions:
+    - us-east-1
+    - us-east-2
+tests:
+  default:
+    template: ./templates/master.template.yaml
+    parameters:
+      NodeOS: "RHEL8HA"
+      KeyPairName: "baechans@amazon.com"
+      AvailabilityZones: "$[taskcat_getaz_3]"
+      NumberOfAZs: "3"
+      QSS3KeyPrefix: "qs-rhel-with-ha/"
+      QSS3BucketName: '$[taskcat_autobucket]'
+      QSS3BucketRegion: "$[taskcat_current_region]"
