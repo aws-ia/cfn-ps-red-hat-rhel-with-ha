@@ -176,7 +176,6 @@ Resources:
         AvailabilityZones: !Join 
           - ','
           - !Ref AvailabilityZones
-        KeyPairName: !Ref KeyPairName
         NumberOfAZs: !Ref NumberOfAZs
         CreatePublicSubnets: 'false'
         CreateNATGateways: 'false'

@@ -14,7 +14,7 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
   ImageId:
     Description: "ID of AMI used to launch instance"
-    Type: String
+    Type: AWS::EC2::Image::Id
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
