@@ -9,20 +9,12 @@ Parameters:
     Default: t2.medium
     Description: "EC2 instance type"
     Type: String
-  SubnetID:
+  SubnetId:
     Description: "Identifer of subnet the instance resides in"
     Type: AWS::EC2::Subnet::Id
-  NodeOS:
-    AllowedValues:
-      - 'RHEL7HA'
-      - 'RHEL8HA'
-    ConstraintDescription: The QuickStart supports only RHEL7 and RHEL8
-    Description: Version of RHEL with HA OS to use for the node instances
+  ImageId:
+    Description: "ID of AMI used to launch instance"
     Type: String
-Mappings:
-  RHELwithHAAMI:
-    RHEL7HA: 
-    RHEl8HA:
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -30,4 +22,4 @@ Resources:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
       SubnetId: !Ref SubnetId
-      ImageId: #ask david
+      ImageId: !Ref ImageId

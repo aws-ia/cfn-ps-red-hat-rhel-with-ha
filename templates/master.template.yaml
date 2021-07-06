@@ -98,6 +98,71 @@ Parameters:
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+Mappings:
+  RHELami:
+    "us-east-1":
+      RHEL7HA: ami-098453baf108a57d0
+      RHEL8HA: ami-02e0bb36c61bb9715
+    "us-east-2":
+      RHEL7HA: ami-0dd38e30236fe14ea
+      RHEL8HA: ami-0b2e47f3b2e23d235
+    "us-west-1":
+      RHEL7HA: ami-0789e54ffc32dc9da
+      RHEL8HA: ami-054965c6cd7c6e462
+    "us-west-2":
+      RHEL7HA: ami-0171b09cf934fb33a
+      RHEL8HA: ami-0b28dfc7adc325ef4
+    "eu-west-1":
+      RHEL7HA: ami-0cfc6fb6e60e196f8
+      RHEL8HA: ami-0d81e223398b63904
+    "eu-west-2":
+      RHEL7HA: ami-053d6c7abdf54ce92
+      RHEL8HA: ami-09bf14849cf710ded
+    "eu-west-3":
+      RHEL7HA: ami-04917e48135204586
+      RHEL8HA: ami-08755c4342fb5aede
+    "eu-central-1":
+      RHEL7HA: ami-00cab56f55121d35b
+      RHEL8HA: ami-06ec8443c2a35b0ba
+    "eu-south-1":
+      RHEL7HA: ami-0c00b84d9b83462ee
+      RHEL8HA: ami-022d5f84fcef245d6
+    "eu-north-1":
+      RHEL7HA: ami-0ecf4056cdb23e820
+      RHEL8HA: ami-0baa9e2e64f3c00db
+    "ap-south-1":
+      RHEL7HA: ami-0c6e634411330b720
+      RHEL8HA: ami-06a0b4e3b7eb7a300
+    "ap-southeast-1":
+      RHEL7HA: ami-01d397c674caa615b
+      RHEL8HA: ami-0d6ba217f554f6137
+    "ap-southeast-2":
+      RHEL7HA: ami-07fd71119129438ff
+      RHEL8HA: ami-016461ac55b16fd05
+    "ap-northeast-1":
+      RHEL7HA: ami-05b2d9fe3b21d7d99
+      RHEL8HA: ami-0cf31bd68732fb0e2
+    "ap-northeast-2":
+      RHEL7HA: ami-09638d3117628fe1e
+      RHEL8HA: ami-0bb1758bf5a69ca5c
+    "ap-northeast-3":
+      RHEL7HA: ami-0b03f51a693ae65a5
+      RHEL8HA: ami-08daa4649f61b8684
+    "ap-east-1":
+      RHEL7HA: ami-0f4a6eba1c2a4cf75
+      RHEL8HA: ami-0bd4a3e0dc2940f8b
+    "af-south-1":
+      RHEL7HA: ami-0c4f78f1fd5926d4b
+      RHEL8HA: ami-054b87e0abc89db2b
+    "me-south-1":
+      RHEL7HA: ami-0ae0e0da2a1a21c28
+      RHEL8HA: ami-000511140e17c0c0c
+    "sa-east-1":
+      RHEL7HA: ami-066bae248b2be862c
+      RHEL8HA: ami-0a0013406b4d60022
+    "ca-central-1":
+      RHEL7HA: ami-030c9fd94feef0f25
+      RHEL8HA: ami-0277fbe7afa8a33a6
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -130,8 +195,8 @@ Resources:
       Parameters:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
-        SubnetID: #ask david
-        NodeOS: !Ref NodeOS
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
   Node2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -143,8 +208,8 @@ Resources:
       Parameters:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
-        SubnetID: #ask david
-        NodeOS: !Ref NodeOS
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
   Node3Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -156,6 +221,6 @@ Resources:
       Parameters:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
-        SubnetID: #ask david
-        NodeOS: !Ref NodeOS
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
 
