@@ -177,11 +177,11 @@ Resources:
           - ','
           - !Ref AvailabilityZones
         NumberOfAZs: !Ref NumberOfAZs
-        CreatePublicSubnets: 'false'
-        CreateNATGateways: 'false'
+        # CreatePublicSubnets: 'false'
+        # CreateNATGateways: 'false'
         PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
-        PrivatSubnet3ACIDR: !Ref PrivateSubnet3CIDR
+        PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
         VPCCIDR: !Ref VPCCIDR
   Node1Stack:
     Type: 'AWS::CloudFormation::Stack'

@@ -4,7 +4,6 @@ project:
   name: quickstart-rhel-with-ha
   regions:
     - us-east-1
-    - us-east-2
 tests:
   default:
     template: ./templates/master.template.yaml
@@ -13,6 +12,6 @@ tests:
       KeyPairName: "baechans@amazon.com"
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
-      QSS3KeyPrefix: "qs-rhel-with-ha/"
+      QSS3KeyPrefix: "quickstart-rhel-with-ha/"
       QSS3BucketName: '$[taskcat_autobucket]'
       QSS3BucketRegion: "$[taskcat_current_region]"
