@@ -41,14 +41,6 @@ Parameters:
   KeyPairName:
     ConstraintDescription: "Name of an existing EC2 KeyPair."
     Type: "AWS::EC2::KeyPair::KeyName"
-  # CreatePublicSubnets:
-  #   Default: 'false'
-  #   Description: Only private subnets for now
-  #   Type: String
-  # CreateNATGateways:
-  #   Default: 'false'
-  #   Description: Only private subnets for now
-  #   Type: String
   PrivateSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
@@ -169,7 +161,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -177,8 +169,8 @@ Resources:
           - ','
           - !Ref AvailabilityZones
         NumberOfAZs: !Ref NumberOfAZs
-        # CreatePublicSubnets: 'false'
-        # CreateNATGateways: 'false'
+        CreatePublicSubnets: 'false'
+        CreateNATGateways: 'false'
         PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
         PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
