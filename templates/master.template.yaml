@@ -175,6 +175,13 @@ Resources:
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
         PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
         VPCCIDR: !Ref VPCCIDR
+  ClusterSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Sets up inbound rule for communication among nodes'
+      SecurityGroupIngress:
+        - IpProtocol: '-1'
+        - CidrIp: !Ref VPCCIDR
   Node1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -188,6 +195,7 @@ Resources:
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
   Node2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -201,6 +209,7 @@ Resources:
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
   Node3Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -214,4 +223,5 @@ Resources:
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
 

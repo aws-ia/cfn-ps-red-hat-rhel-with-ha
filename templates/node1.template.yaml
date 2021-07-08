@@ -15,6 +15,9 @@ Parameters:
   ImageId:
     Description: "ID of AMI used to launch instance"
     Type: AWS::EC2::Image::Id
+  SecurityGroupId:
+    Description: "ID of Security Group for cluster communication"
+    Type: AWS::EC2::SecurityGroup::Id
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -23,3 +26,5 @@ Resources:
       InstanceType: !Ref InstanceType
       SubnetId: !Ref SubnetId
       ImageId: !Ref ImageId
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
