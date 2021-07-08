@@ -179,9 +179,10 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: 'Sets up inbound rule for communication among nodes'
+      VpcId: !GetAtt VPCStack.Outputs.VPCID 
       SecurityGroupIngress:
         - IpProtocol: '-1'
-        - CidrIp: !Ref VPCCIDR
+          CidrIp: !Ref VPCCIDR
   Node1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
