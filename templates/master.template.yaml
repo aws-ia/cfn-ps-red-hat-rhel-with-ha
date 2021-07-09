@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template sets up the basic framework for the RHEL with HA Quick Start.
+Description: This template sets up the basic framework for the RHEL with HA Quick Start. (qs-1s2mh2a9e)
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones to use for the subnets in the VPC. The logical order of
@@ -169,8 +169,6 @@ Resources:
           - ','
           - !Ref AvailabilityZones
         NumberOfAZs: !Ref NumberOfAZs
-        CreatePublicSubnets: 'false'
-        CreateNATGateways: 'false'
         PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
         PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
@@ -183,6 +181,8 @@ Resources:
       SecurityGroupIngress:
         - IpProtocol: '-1'
           CidrIp: !Ref VPCCIDR
+        - IpProtocol: 'tcp'
+          CidrIp: '0.0.0.0/0'
   Node1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:

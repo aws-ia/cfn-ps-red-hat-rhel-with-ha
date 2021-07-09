@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template sets up RHEL with HA in Node 2 of the cluster.
+Description: This template sets up RHEL with HA in Node 2 of the cluster. (qs-1s2mh2abn)
 Parameters:
   KeyPairName:
     ConstraintDescription: "Name of an existing EC2 KeyPair."
