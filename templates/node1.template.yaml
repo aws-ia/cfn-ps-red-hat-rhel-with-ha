@@ -21,17 +21,6 @@ Parameters:
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
-    Metadata:
-      AWS::CloudFormation::Init:
-        configSets:
-          install:
-            - 'install'
-        install:
-          packages:
-            yum: 
-              pcs: []
-              pacemaker: []
-              fence-agents-aws: []
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -39,21 +28,3 @@ Resources:
       ImageId: !Ref ImageId
       SecurityGroupIds:
         - !Ref SecurityGroupId
-      UserData: !Base64 
-        'Fn::Join':
-          - ''
-          - - |
-              #!/bin/bash -xe
-            - |
-              yum install -y aws-cfn-bootstrap
-            - |
-              # Install the files and packages from the metadata
-            - '/opt/aws/bin/cfn-init -v '
-            - '         --stack '
-            - !Ref 'AWS::StackName'
-            - '         --resource RHELwithHAInstance '
-            - '         --configsets install '
-            - '         --region '
-            - !Ref 'AWS::Region'
-            - |+
-
