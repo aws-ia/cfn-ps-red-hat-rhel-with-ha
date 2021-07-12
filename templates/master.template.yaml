@@ -6,6 +6,10 @@ Parameters:
     Description: List of Availability Zones to use for the subnets in the VPC. The logical order of
       your selections is preserved.
     Type: List<AWS::EC2::AvailabilityZone::Name>
+  ClusterPassword:
+    Description: Password used for the user HACluster in the RHEL HA setup
+    Type: String
+    NoEcho: true
   NumberOfAZs:
     Type: String
     Default: '3'
@@ -183,6 +187,37 @@ Resources:
           CidrIp: !Ref VPCCIDR
         - IpProtocol: 'tcp'
           CidrIp: '0.0.0.0/0'
+  ClusterRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: "Allows access to the S3 bucket"
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: s3:*
+                Resource: 'arn:aws:s3:::${QSSBucketName}'
+              - Effect: Allow
+                Action: 
+                Resource: 'arn:aws:s3:::${QSSBucketName}/*'
+  ClusterInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ClusterRole
   Node1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -197,6 +232,7 @@ Resources:
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
+        ClusterPassword: !Ref ClusterPassword
   Node2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -211,6 +247,7 @@ Resources:
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
+        ClusterPassword: !Ref ClusterPassword
   Node3Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -225,4 +262,4 @@ Resources:
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
-
+        ClusterPassword: !Ref ClusterPassword

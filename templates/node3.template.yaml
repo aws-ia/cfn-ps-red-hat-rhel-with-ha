@@ -18,6 +18,10 @@ Parameters:
   SecurityGroupId:
     Description: "ID of Security Group for cluster communication"
     Type: AWS::EC2::SecurityGroup::Id
+  ClusterPassword:
+    Description: Password used for the user HACluster in the RHEL HA setup
+    Type: String
+    NoEcho: true
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance

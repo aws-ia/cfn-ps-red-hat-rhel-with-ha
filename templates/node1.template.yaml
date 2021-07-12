@@ -18,9 +18,37 @@ Parameters:
   SecurityGroupId:
     Description: "ID of Security Group for cluster communication"
     Type: AWS::EC2::SecurityGroup::Id
+  ClusterPassword:
+    Description: Password used for the user HACluster in the RHEL HA setup
+    Type: String
+    NoEcho: true
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          install:
+            - 'install'
+          setup:
+            - 'install'
+            - 'setup'
+        install:
+          packages:
+            yum: 
+              pcs: []
+              pacemaker: []
+              fence-agents-aws: []
+        setup:
+          commands: 
+            setpassword:
+              command: "echo -e \"$CLUSTERPASSWORD\" | passwd hacluster" 
+              env:
+                CLUSTERPASSWORD: !Ref ClusterPassword
+            startservice:
+              command: "systemctl start pcsd.service"
+            enableservice:
+              command: "systemctl enable pcsd.service"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -28,3 +56,25 @@ Resources:
       ImageId: !Ref ImageId
       SecurityGroupIds:
         - !Ref SecurityGroupId
+      UserData: !Base64 
+        'Fn::Join':
+          - ''
+          - - |
+              #!/bin/bash -xe
+            - |
+              yum install -y aws-cfn-bootstrap
+            - |
+              # Install the files and packages from the metadata
+            - '/opt/aws/bin/cfn-init -v '
+            - '         --stack '
+            - !Ref 'AWS::StackName'
+            - '         --resource RHELwithHAInstance '
+            - '         --configsets install '
+            - '         --region '
+            - !Ref 'AWS::Region'
+            - |
+              curl !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/upload_hostname.py
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+            - |+
