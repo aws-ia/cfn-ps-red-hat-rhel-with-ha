@@ -1,13 +1,15 @@
 import boto3
 import botocore
 import subprocess
+import os
+import sys
 
 s3_client = boto3.client('s3')
+hostname = os.uname()[1]
 
-# error if argv length is not 3
+# error if argv length is not 2
 # sys.argv[1] = the bucket name to store the files
-# sys.argv[2] = the hostname
 
 subprocess.call('touch $(hostname)', shell=True)
 
-s3_client.upload_file('./' + sys.argv[2], sys.argv[1], 'hostnames/' + sys.argv[2])
+s3_client.upload_file('./' + hostname, sys.argv[1], 'hostnames/' + hostname)
