@@ -6,7 +6,7 @@ project:
     - us-east-1
 tests:
   default:
-    template: ./templates/master.template.yaml
+    template: ./templates/main.template.yaml
     parameters:
       NodeOS: "RHEL8HA"
       KeyPairName: "baechans@amazon.com"

@@ -22,10 +22,22 @@ Parameters:
     Description: Password used for the user HACluster in the RHEL HA setup
     Type: String
     NoEcho: true
+  BucketName:
+    Description: Name of bucket that will contain the hostnames
+    Type: String
+  ClusterRole:
+    Description: IAM Role for access to S3 Bucket
+    Type: AWS::IAM::Role
+  ClusterProfile:
+    Type: AWS::IAM::InstanceProfile
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
     Metadata:
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref ClusterRole
       AWS::CloudFormation::Init:
         configSets:
           install:
@@ -34,13 +46,28 @@ Resources:
             - 'install'
             - 'setup'
         install:
-          packages:
+          packages: 
             yum: 
               pcs: []
               pacemaker: []
               fence-agents-aws: []
         setup:
-          commands: 
+          files:
+            "/upload_hostname.py":
+              source:
+                !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/upload_hostname.py
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+              authentication: S3AccessCreds
+            "/get_hostnames.py":
+              source:
+                !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/get_hostnames.py
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+              authentication: S3AccessCreds
+          commands:
             setpassword:
               command: "echo -e \"$CLUSTERPASSWORD\" | passwd hacluster" 
               env:
@@ -49,9 +76,12 @@ Resources:
               command: "systemctl start pcsd.service"
             enableservice:
               command: "systemctl enable pcsd.service"
+            execute:
+              command: !Sub "python3 upload_hostname.py ${BucketName}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref ClusterProfile
       SubnetId: !Ref SubnetId
       ImageId: !Ref ImageId
       SecurityGroupIds:
@@ -62,6 +92,7 @@ Resources:
           - - |
               #!/bin/bash -xe
             - |
+              # Replace with David's script
               yum install -y aws-cfn-bootstrap
             - |
               # Install the files and packages from the metadata
@@ -69,12 +100,7 @@ Resources:
             - '         --stack '
             - !Ref 'AWS::StackName'
             - '         --resource RHELwithHAInstance '
-            - '         --configsets install '
+            - '         --configsets setup '
             - '         --region '
             - !Ref 'AWS::Region'
-            - |
-              curl !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/upload_hostname.py
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
             - |+

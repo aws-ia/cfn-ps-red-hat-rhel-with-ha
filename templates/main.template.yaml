@@ -177,6 +177,20 @@ Resources:
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
         PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
         VPCCIDR: !Ref VPCCIDR
+  BastionStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/linux-bastion.template
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
+        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        RemoteAccessCIDR: '0.0.0.0/0'
+        KeyPairName: !Ref KeyPairName
   ClusterSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -187,6 +201,10 @@ Resources:
           CidrIp: !Ref VPCCIDR
         - IpProtocol: 'tcp'
           CidrIp: '0.0.0.0/0'
+  HostnameBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
   ClusterRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -208,10 +226,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: s3:*
-                Resource: 'arn:aws:s3:::${QSSBucketName}'
-              - Effect: Allow
-                Action: 
-                Resource: 'arn:aws:s3:::${QSSBucketName}/*'
+                Resource: 
+                  - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}/*'
+                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]
+                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]                
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
@@ -233,6 +252,9 @@ Resources:
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
   Node2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -248,6 +270,9 @@ Resources:
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
   Node3Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -263,3 +288,6 @@ Resources:
         ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
