@@ -77,7 +77,7 @@ Resources:
             enableservice:
               command: "systemctl enable pcsd.service"
             execute:
-              command: !Sub "python3 upload_hostname.py ${BucketName}"
+              command: !Sub "python3 get_hostnames.py ${BucketName}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
