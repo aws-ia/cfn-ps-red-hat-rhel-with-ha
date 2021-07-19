@@ -73,15 +73,15 @@ Resources:
               authentication: S3AccessCreds
           commands:
             setpassword:
-              command: "echo -e \"$CLUSTERPASSWORD\" | passwd hacluster" 
+              command: "echo -e \"$CLUSTERPASSWORD\" | sudo passwd hacluster" 
               env:
                 CLUSTERPASSWORD: !Ref ClusterPassword
             startservice:
-              command: "systemctl start pcsd.service"
+              command: "sudo systemctl start pcsd.service"
             enableservice:
-              command: "systemctl enable pcsd.service"
+              command: "sudo systemctl enable pcsd.service"
             execute:
-              command: !Sub "python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId}"
+              command: !Sub "sudo python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType

@@ -69,15 +69,15 @@ Resources:
               authentication: S3AccessCreds
           commands:
             setpassword:
-              command: "echo -e \"$CLUSTERPASSWORD\" | passwd hacluster" 
+              command: "echo -e \"$CLUSTERPASSWORD\" | sudo passwd hacluster" 
               env:
                 CLUSTERPASSWORD: !Ref ClusterPassword
             startservice:
-              command: "systemctl start pcsd.service"
+              command: "sudo systemctl start pcsd.service"
             enableservice:
-              command: "systemctl enable pcsd.service"
+              command: "sudo systemctl enable pcsd.service"
             execute:
-              command: !Sub "python3 upload_hostname.py ${BucketName}"
+              command: !Sub "sudo python3 upload_hostname.py ${BucketName}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
