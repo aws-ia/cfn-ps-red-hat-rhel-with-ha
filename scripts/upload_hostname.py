@@ -7,8 +7,8 @@ import sys
 s3_client = boto3.client('s3')
 hostname = os.uname()[1]
 
-# error if argv length is not 2
 # sys.argv[1] = the bucket name to store the files
+# sys.argv[2] = the instance-id
 
 subprocess.call('touch $(hostname)', shell=True)
 

@@ -45,6 +45,12 @@ Parameters:
   KeyPairName:
     ConstraintDescription: "Name of an existing EC2 KeyPair."
     Type: "AWS::EC2::KeyPair::KeyName"
+  FloatingIPAddress:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
+    ConstraintDescription: IP Address must be in the form x.x.x.x
+    Description: Floating IP Address (MUST not be in any out the subnets)
+    Default: 10.0.1.0
+    Type: String
   PrivateSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
@@ -191,6 +197,25 @@ Resources:
         PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
         RemoteAccessCIDR: '0.0.0.0/0'
         KeyPairName: !Ref KeyPairName
+  HARouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VPCID: !GetAtt VPCStack.Outputs.VPCID
+  SubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+      RouteTableId: !Ref HARouteTable
+  SubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+      RouteTableId: !Ref HARouteTable
+  SubnetRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+      RouteTableId: !Ref HARouteTable
   ClusterSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -291,3 +316,5 @@ Resources:
         BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
+        FloatingIPAddress: !Ref FloatingIPAddress
+        RouteTableId: !Ref HARouteTable

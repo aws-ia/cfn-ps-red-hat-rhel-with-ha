@@ -30,6 +30,10 @@ Parameters:
     Type: AWS::IAM::Role
   ClusterProfile:
     Type: AWS::IAM::InstanceProfile
+  FloatingIPAddress:
+    Type: String
+  RouteTableId:
+    Type: AWS::EC2::RouteTable::Id
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -77,7 +81,7 @@ Resources:
             enableservice:
               command: "systemctl enable pcsd.service"
             execute:
-              command: !Sub "python3 get_hostnames.py ${BucketName}"
+              command: !Sub "python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
