@@ -15,3 +15,4 @@ tests:
       QSS3KeyPrefix: "quickstart-rhel-with-ha/"
       QSS3BucketName: '$[taskcat_autobucket]'
       QSS3BucketRegion: "$[taskcat_current_region]"
+      ClusterPassword: "anypassw123123"
