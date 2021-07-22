@@ -200,7 +200,7 @@ Resources:
   HARouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
-      VPCID: !GetAtt VPCStack.Outputs.VPCID
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
   SubnetRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:

@@ -27,13 +27,13 @@ Parameters:
     Type: String
   ClusterRole:
     Description: IAM Role for access to S3 Bucket
-    Type: AWS::IAM::Role
+    Type: String
   ClusterProfile:
-    Type: AWS::IAM::InstanceProfile
+    Type: String
   FloatingIPAddress:
     Type: String
   RouteTableId:
-    Type: AWS::EC2::RouteTable::Id
+    Type: String
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
