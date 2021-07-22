@@ -188,7 +188,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/linux-bastion.template
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -224,8 +224,6 @@ Resources:
       SecurityGroupIngress:
         - IpProtocol: '-1'
           CidrIp: !Ref VPCCIDR
-        - IpProtocol: 'tcp'
-          CidrIp: '0.0.0.0/0'
   HostnameBucket:
     Type: AWS::S3::Bucket
     Properties:
