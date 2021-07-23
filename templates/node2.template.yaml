@@ -18,16 +18,16 @@ Parameters:
   SecurityGroupId:
     Description: "ID of Security Group for cluster communication"
     Type: AWS::EC2::SecurityGroup::Id
-  ClusterPassword:
-    Description: Password used for the user HACluster in the RHEL HA setup
-    Type: String
-    NoEcho: true
-  BucketName:
-    Description: Name of bucket that will contain the hostnames
-    Type: String
-  ClusterRole:
-    Description: IAM Role for access to S3 Bucket
-    Type: String
+  # ClusterPassword:
+  #   Description: Password used for the user HACluster in the RHEL HA setup
+  #   Type: String
+  #   NoEcho: true
+  # BucketName:
+  #   Description: Name of bucket that will contain the hostnames
+  #   Type: String
+  # ClusterRole:
+  #   Description: IAM Role for access to S3 Bucket
+  #   Type: String
   ClusterProfile:
     Type: String
 Resources:
