@@ -6,7 +6,7 @@ project:
     - us-east-1
 tests:
   default:
-    template: ./templates/master.template.yaml
+    template: ./templates/main.template.yaml
     parameters:
       NodeOS: "RHEL8HA"
       KeyPairName: "baechans@amazon.com"
@@ -15,3 +15,4 @@ tests:
       QSS3KeyPrefix: "quickstart-rhel-with-ha/"
       QSS3BucketName: '$[taskcat_autobucket]'
       QSS3BucketRegion: "$[taskcat_current_region]"
+      ClusterPassword: "anypassw123123"
