@@ -37,6 +37,21 @@ Parameters:
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref ClusterRole
+      AWS::CloudFormation::Init:
+        configSets:
+          install:
+            - 'install'
+        install:
+          packages: 
+            yum: 
+              pcs: []
+              pacemaker: []
+              fence-agents-aws: []
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -45,3 +60,16 @@ Resources:
       ImageId: !Ref ImageId
       SecurityGroupIds:
         - !Ref SecurityGroupId
+      UserData: !Base64 
+        Fn::Sub:
+          - |
+            #cloud-config
+            runcmd:
+              - ['sudo', 'dnf', '-y', 'install', 'wget', 'python3', 'python3-setuptools', 'python3-docutils']
+              - ['sudo', 'wget', "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz", -O, "/tmp/aws-cfn-bootstrap-py3-latest.tar.gz" ]
+              - ['sudo', 'wget', '-O', '/tmp/pystache-0.5.4.tar.gz', 'https://files.pythonhosted.org/packages/d6/fd/eb8c212053addd941cc90baac307c00ac246ac3fce7166b86434c6eae963/pystache-0.5.4.tar.gz']
+              - ['sudo', 'easy_install-3', '/tmp/pystache-0.5.4.tar.gz']
+              - ['sudo', 'easy_install-3', '--script-dir', '/usr/local/bin', '/tmp/aws-cfn-bootstrap-py3-latest.tar.gz']
+              - ['sudo', '/usr/local/bin/cfn-init', '-v', '--stack', ${STACKNAME}, '--resource', 'RHELwithHAInstance', '--configsets', 'install', '--region', ${REGION} ]
+          - { STACKNAME: !Ref 'AWS::StackName', REGION: !Ref 'AWS::Region' }
+
