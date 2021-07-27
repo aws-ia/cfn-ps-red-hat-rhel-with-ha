@@ -25,9 +25,9 @@ Parameters:
   # BucketName:
   #   Description: Name of bucket that will contain the hostnames
   #   Type: String
-  # ClusterRole:
-  #   Description: IAM Role for access to S3 Bucket
-  #   Type: String
+  ClusterRole:
+    Description: IAM Role for access to S3 Bucket
+    Type: String
   ClusterProfile:
     Type: String
 Resources:
