@@ -201,21 +201,54 @@ Resources:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !GetAtt VPCStack.Outputs.VPCID
-  SubnetRouteTableAssociation1:
+  NATRouteTable1:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  NATRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-      RouteTableId: !Ref HARouteTable
-  SubnetRouteTableAssociation2:
+      RouteTableId: !Ref NATRouteTable1
+  NATRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+       RouteTableId:
+         Ref: NATRouteTable1
+       DestinationCidrBlock: 0.0.0.0/0
+       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway1ID   
+  NATRouteTable2:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  NATRouteTableAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-      RouteTableId: !Ref HARouteTable
-  SubnetRouteTableAssociation3:
+      RouteTableId: !Ref NATRouteTable2
+  NATRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+       RouteTableId:
+         Ref: NATRouteTable2
+       DestinationCidrBlock: 0.0.0.0/0
+       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway2ID   
+  NATRouteTable3:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  NATRouteTableAssociation3:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
-      RouteTableId: !Ref HARouteTable
+      RouteTableId: !Ref NATRouteTable3
+  NATRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+       RouteTableId:
+         Ref: NATRouteTable3
+       DestinationCidrBlock: 0.0.0.0/0
+       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway3ID   
   ClusterSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
