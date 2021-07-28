@@ -18,22 +18,30 @@ Parameters:
   SecurityGroupId:
     Description: "ID of Security Group for cluster communication"
     Type: AWS::EC2::SecurityGroup::Id
-  # ClusterPassword:
-  #   Description: Password used for the user HACluster in the RHEL HA setup
-  #   Type: String
-  #   NoEcho: true
-  # BucketName:
-  #   Description: Name of bucket that will contain the hostnames
-  #   Type: String
+  ClusterPassword:
+    Description: Password used for the user HACluster in the RHEL HA setup
+    Type: String
+    NoEcho: true
+  BucketName:
+    Description: Name of bucket that will contain the hostnames
+    Type: String
   ClusterRole:
     Description: IAM Role for access to S3 Bucket
     Type: String
   ClusterProfile:
     Type: String
-  # FloatingIPAddress:
-  #   Type: String
-  # RouteTableId:
-  #   Type: String
+  FloatingIPAddress:
+    Type: String
+  RouteTableId:
+    Type: String
+  QSS3BucketName:
+    Type: String
+  QSS3BucketRegion:
+    Type: String
+  QSS3KeyPrefix:
+    Type: String
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -46,12 +54,48 @@ Resources:
         configSets:
           install:
             - 'install'
+          setup:
+            - 'install'
+            - 'setup'
+            - 'service'
+            - 'hostname'
         install:
           packages: 
             yum: 
               pcs: []
               pacemaker: []
               fence-agents-aws: []
+        setup:
+          files:
+            "/upload_hostname.py":
+              source:
+                !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/upload_hostname.py
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+              authentication: S3AccessCreds
+            "/get_hostnames.py":
+              source:
+                !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/get_hostnames.py
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+              authentication: S3AccessCreds
+          commands:
+            setpassword:
+              command: "echo \"hacluster:$CLUSTERPASSWORD\" | sudo chpasswd" 
+              env:
+                CLUSTERPASSWORD: !Ref ClusterPassword
+        service:
+          commands:
+            a_startservice:
+              command: "sudo systemctl start pcsd.service"
+            b_enableservice:
+              command: "sudo systemctl enable pcsd.service"
+        hostname:
+          commands:
+            execute:
+              command: !Sub "sudo python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -70,6 +114,5 @@ Resources:
               - ['sudo', 'wget', '-O', '/tmp/pystache-0.5.4.tar.gz', 'https://files.pythonhosted.org/packages/d6/fd/eb8c212053addd941cc90baac307c00ac246ac3fce7166b86434c6eae963/pystache-0.5.4.tar.gz']
               - ['sudo', 'easy_install-3', '/tmp/pystache-0.5.4.tar.gz']
               - ['sudo', 'easy_install-3', '--script-dir', '/usr/local/bin', '/tmp/aws-cfn-bootstrap-py3-latest.tar.gz']
-              - ['sudo', '/usr/local/bin/cfn-init', '-v', '--stack', ${STACKNAME}, '--resource', 'RHELwithHAInstance', '--configsets', 'install', '--region', ${REGION} ]
+              - ['sudo', '/usr/local/bin/cfn-init', '-v', '--stack', ${STACKNAME}, '--resource', 'RHELwithHAInstance', '--configsets', 'setup', '--region', ${REGION} ]
           - { STACKNAME: !Ref 'AWS::StackName', REGION: !Ref 'AWS::Region' }
-

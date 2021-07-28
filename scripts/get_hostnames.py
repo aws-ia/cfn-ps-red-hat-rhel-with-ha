@@ -26,19 +26,15 @@ hostlist.append(hostname)
 
 if len(hostlist) == 2:
     subprocess.call('sudo pcs host auth ' + hostlist[0] + ' ' + hostlist[1] + ' -u hacluster -p ' + sys.argv[2], shell=True)
-    subprocess.call('sudo pcs cluster setup --name newcluster ' + hostlist[0] + ' ' + hostlist[1] + ' -u hacluster -p ' + sys.argv[2] + ' --force', shell=True)
+    subprocess.call('sudo pcs cluster setup newcluster ' + hostlist[0] + ' ' + hostlist[1] + ' --force', shell=True)
     subprocess.call('sudo pcs cluster start --all --wait', shell=True)
 elif len(hostlist) == 3:
     subprocess.call('sudo pcs host auth ' + hostlist[0] + ' ' + hostlist[1] + ' ' + hostlist[2] + ' -u hacluster -p ' + sys.argv[2], shell=True)
-    subprocess.call('sudo pcs cluster setup --name newcluster ' + hostlist[0] + ' ' + hostlist[1] + ' -u hacluster -p ' + sys.argv[2] + ' --force', shell=True)
+    subprocess.call('sudo pcs cluster setup newcluster ' + hostlist[0] + ' ' + hostlist[1] + ' ' + hostlist[2] + ' --force', shell=True)
     subprocess.call('sudo pcs cluster start --all --wait', shell=True)
 elif len(hostlist) == 4:
     subprocess.call('sudo pcs host auth ' + hostlist[0] + ' ' + hostlist[1] + ' ' + hostlist[2] + ' ' + hostlist[3] + ' -u hacluster -p ' + sys.argv[2], shell=True)
-    subprocess.call('sudo pcs cluster setup --name newcluster ' + hostlist[0] + ' ' + hostlist[1] + ' -u hacluster -p ' + sys.argv[2] + ' --force', shell=True)
+    subprocess.call('sudo pcs cluster setup newcluster ' + hostlist[0] + ' ' + hostlist[1] + ' ' + hostlist[2] + ' ' + hostlist[3] + ' --force', shell=True)
     subprocess.call('sudo pcs cluster start --all --wait', shell=True)
 else:
     print('invalid number of hostnames')
-
-
-
-
