@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template sets up RHEL with HA in Node 3 of the cluster. (qs-1s4ofsifo)
+Description: This template sets up RHEL with HA in Node 4 (or the last node) of the cluster. (qs-1s2qufol1)
 Parameters:
   KeyPairName:
     ConstraintDescription: "Name of an existing EC2 KeyPair."
@@ -29,6 +29,10 @@ Parameters:
     Description: IAM Role for access to S3 Bucket
     Type: String
   ClusterProfile:
+    Type: String
+  FloatingIPAddress:
+    Type: String
+  RouteTableId:
     Type: String
   QSS3BucketName:
     Type: String
@@ -91,7 +95,7 @@ Resources:
         hostname:
           commands:
             execute:
-              command: !Sub "sudo python3 upload_hostname.py ${BucketName}"
+              command: !Sub "sudo python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
