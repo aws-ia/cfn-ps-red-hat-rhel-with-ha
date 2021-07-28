@@ -283,8 +283,8 @@ Resources:
               - Effect: Allow
                 Action: #Subject to change later
                   - s3:ListBucket
-                  - s3:GetObjectVersion
-                  - s3:GetObjectVersionAcl
+                  - s3:GetObject
+                  - s3:PutObject
                 Resource: 
                   - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}'
                   - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}/*'
@@ -314,6 +314,9 @@ Resources:
         BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
   Node2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -332,6 +335,9 @@ Resources:
         BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
   Node3Stack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -352,3 +358,6 @@ Resources:
         ClusterProfile: !Ref ClusterInstanceProfile
         FloatingIPAddress: !Ref FloatingIPAddress
         RouteTableId: !Ref HARouteTable
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
