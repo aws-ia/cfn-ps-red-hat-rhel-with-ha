@@ -51,7 +51,7 @@ Parameters:
   FloatingIPAddress:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
     ConstraintDescription: IP Address must be in the form x.x.x.x
-    Description: Floating IP Address (MUST not be in any out the subnets)
+    Description: Floating IP Address (MUST not be in any of the subnets)
     Default: 10.0.1.0
     Type: String
   PrivateSubnet1CIDR:
@@ -213,9 +213,13 @@ Resources:
       Parameters:
         VPCID: !GetAtt VPCStack.Outputs.VPCID
         PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID #check if I can access the other nodes via bastion instance
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         KeyPairName: !Ref KeyPairName
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix:
+          Fn::Sub: ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
   HARouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -387,7 +391,7 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        #add parameters to get instance ids of node1,2,3 with conditionals
+        #add parameters to get instance ids of node1,2,3 with conditionals for fencing
   ExtraNode1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: ThreeOrFour

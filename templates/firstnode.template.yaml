@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: This template sets up RHEL with HA in the first node of the cluster. (qs-1s2mh2abe)
-Parameters: #add constraints (super low priority)
+Parameters:
   KeyPairName:
     ConstraintDescription: "Name of an existing EC2 KeyPair."
     Type: "AWS::EC2::KeyPair::KeyName"
