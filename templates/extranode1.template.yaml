@@ -82,8 +82,6 @@ Resources:
           roleName: !Ref ClusterRole
       AWS::CloudFormation::Init:
         configSets:
-          install:
-            - 'install'
           setup:
             - 'install'
             - 'setup'
