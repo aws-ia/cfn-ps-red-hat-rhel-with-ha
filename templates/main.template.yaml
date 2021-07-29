@@ -7,10 +7,13 @@ Parameters:
       your selections is preserved.
     Type: List<AWS::EC2::AvailabilityZone::Name>
   ClusterPassword:
+    AllowedPattern: ^\S+$
+    ConstraintDescription: Password should not be empty or contain whitespace
     Description: Password used for the user HACluster in the RHEL HA setup
     Type: String
     NoEcho: true
   NumberOfAZs:
+    Description: Number of Availability Zones to use for the HA Cluster. This is same as the number of nodes that will be set up.
     Type: String
     Default: '3'
     AllowedValues:
@@ -81,6 +84,11 @@ Parameters:
     Default: 10.0.0.0/16
     Description: CIDR block for the VPC
     Type: String
+  RemoteAccessCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: Allowed CIDR block for external SSH access to the bastions
+    Type: String
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -99,10 +107,11 @@ Parameters:
     Type: String
   NodeOS:
     AllowedValues:
-      - 'RHEL7HA'
+      # - 'RHEL7HA'
       - 'RHEL8HA'
-    ConstraintDescription: The QuickStart supports only RHEL7 and RHEL8
+    ConstraintDescription: The QuickStart supports only RHEL7 and RHEL8 (Currently, only RHEL8 is supported due to aws-cfn-bootstrap)
     Description: Version of RHEL with HA OS to use for the node instances
+    Default: 'RHEL8HA'
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
@@ -204,8 +213,8 @@ Resources:
       Parameters:
         VPCID: !GetAtt VPCStack.Outputs.VPCID
         PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
-        RemoteAccessCIDR: '0.0.0.0/0'
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID #check if I can access the other nodes via bastion instance
+        RemoteAccessCIDR: !Ref RemoteAccessCIDR
         KeyPairName: !Ref KeyPairName
   HARouteTable:
     Type: 'AWS::EC2::RouteTable'
@@ -307,13 +316,13 @@ Resources:
               - 'sts:AssumeRole'
       Description: "Allows access to the S3 bucket"
       Path: /
-      Policies:
+      Policies: #add policy for fencing
         - PolicyName: root
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action: #Subject to change later
+                Action:
                   - s3:ListBucket
                   - s3:GetObject
                   - s3:PutObject
@@ -328,12 +337,12 @@ Resources:
       Path: /
       Roles:
         - !Ref ClusterRole
-  Node1Stack:
+  FirstNodeStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node1.template.yaml
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/firstnode.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -349,14 +358,44 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-  Node2Stack:
+  LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
-    Condition: ThreeOrFour
-    DependsOn: Node1Stack
+    DependsOn: FirstNodeStack
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node2.template.yaml
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/lastnode.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Tags:
+        - Key: Node2Name
+          Value: !If [ThreeOrFour, !Ref ExtraNode1Stack, None]
+        - Key: Node3Name
+          Value: !If [Four, !Ref ExtraNode2Stack, None]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
+        ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
+        FloatingIPAddress: !Ref FloatingIPAddress
+        RouteTableId: !Ref HARouteTable
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        #add parameters to get instance ids of node1,2,3 with conditionals
+  ExtraNode1Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: ThreeOrFour
+    DependsOn: FirstNodeStack
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/extranode1.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -372,14 +411,14 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-  Node3Stack:
+  ExtraNode2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: Four
-    DependsOn: Node2Stack
+    DependsOn: ExtraNode1Stack
     Properties:
       TemplateURL:
         !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node3.template.yaml
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/extranode2.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -392,35 +431,6 @@ Resources:
         BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
-  Node4Stack:
-    Type: 'AWS::CloudFormation::Stack'
-    DependsOn: Node1Stack
-    Properties:
-      TemplateURL:
-        !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node4.template.yaml
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Tags:
-        - Key: Node2Name
-          Value: !If [ThreeOrFour, !Ref Node2Stack, None]
-        - Key: Node3Name
-          Value: !If [Four, !Ref Node3Stack, None]
-      Parameters:
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
-        ClusterPassword: !Ref ClusterPassword
-        BucketName: !Ref HostnameBucket
-        ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
-        FloatingIPAddress: !Ref FloatingIPAddress
-        RouteTableId: !Ref HARouteTable
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
