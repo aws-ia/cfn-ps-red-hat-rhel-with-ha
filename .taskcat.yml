@@ -16,3 +16,4 @@ tests:
       QSS3BucketName: '$[taskcat_autobucket]'
       QSS3BucketRegion: "$[taskcat_current_region]"
       ClusterPassword: "anypassw123123"
+      RemoteAccessCIDR: "0.0.0.0/0"
