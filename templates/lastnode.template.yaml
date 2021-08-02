@@ -1,11 +1,32 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template sets up RHEL with HA in Node 2 of the cluster. (qs-1s2mh2abn)
+Description: This template sets up RHEL with HA in the last node of the cluster. (qs-1s2qufol1)
 Parameters:
   KeyPairName:
     ConstraintDescription: "Name of an existing EC2 KeyPair."
     Type: "AWS::EC2::KeyPair::KeyName"
   InstanceType:
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - r4.large
+      - r4.xlarge
+      - r4.2xlarge
+      - r4.4xlarge
+      - r4.8xlarge
+    ConstraintDescription: "must be a valid EC2 instance type."
     Default: t2.medium
     Description: "EC2 instance type"
     Type: String
@@ -19,6 +40,8 @@ Parameters:
     Description: "ID of Security Group for cluster communication"
     Type: AWS::EC2::SecurityGroup::Id
   ClusterPassword:
+    AllowedPattern: ^\S+$
+    ConstraintDescription: Password should not be empty or contain whitespace
     Description: Password used for the user HACluster in the RHEL HA setup
     Type: String
     NoEcho: true
@@ -26,15 +49,35 @@ Parameters:
     Description: Name of bucket that will contain the hostnames
     Type: String
   ClusterRole:
-    Description: IAM Role for access to S3 Bucket
+    Description: IAM Role for access to the S3 Buckets
     Type: String
   ClusterProfile:
+    Description: IAM Instance Profile for access to the S3 Buckets
+    Type: String
+  FloatingIPAddress:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
+    ConstraintDescription: IP Address must be in the form x.x.x.x
+    Description: Floating IP Address (MUST not be in any out the subnets)
+    Default: 10.0.1.0
+    Type: String
+  RouteTableId:
+    Description: ID of the route table that manages fencing
     Type: String
   QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: aws-quickstart
+    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: String
   QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
     Type: String
   QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: implementing/
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
@@ -48,8 +91,6 @@ Resources:
           roleName: !Ref ClusterRole
       AWS::CloudFormation::Init:
         configSets:
-          install:
-            - 'install'
           setup:
             - 'install'
             - 'setup'
@@ -91,7 +132,7 @@ Resources:
         hostname:
           commands:
             execute:
-              command: !Sub "sudo python3 upload_hostname.py ${BucketName}"
+              command: !Sub "sudo python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
