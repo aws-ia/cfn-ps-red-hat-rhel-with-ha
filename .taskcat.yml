@@ -9,7 +9,7 @@ tests:
     template: ./templates/main.template.yaml
     parameters:
       NodeOS: "RHEL8HA"
-      KeyPairName: "baechans@amazon.com"
+      KeyPairName: "davmayd"
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
       QSS3KeyPrefix: "quickstart-rhel-with-ha/"

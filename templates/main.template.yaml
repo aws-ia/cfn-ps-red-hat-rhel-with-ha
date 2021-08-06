@@ -324,6 +324,11 @@ Resources:
       AccessControl: Private
   ClusterRole:
     Type: 'AWS::IAM::Role'
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - EIAMPolicyWildcardResource #Policy is architected for least privilege; EC2 instances must be able to interact with one another
     Properties:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
