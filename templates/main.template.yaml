@@ -52,7 +52,7 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
     ConstraintDescription: IP Address must be in the form x.x.x.x
     Description: Floating IP Address (MUST not be in any of the subnets)
-    Default: 10.0.1.0
+    Default: 10.1.1.0
     Type: String
   PrivateSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
@@ -220,10 +220,26 @@ Resources:
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix:
           Fn::Sub: ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
+  WaitHandle:
+    Type: 'AWS::CloudFormation::WaitConditionHandle'
+  WaitCondition:
+    Type: 'AWS::CloudFormation::WaitCondition'
+    DependsOn: VPCStack
+    Properties:
+      Handle: !Ref WaitHandle
+      Count: !If [Four, 3, !If [Three, 2, 1]]
+      Timeout: '3600'
   HARouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !GetAtt VPCStack.Outputs.VPCID
+  HARoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: HARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
   NATRouteTable1:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -334,7 +350,50 @@ Resources:
                   - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}'
                   - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}/*'
                   - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]
-                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]                
+                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]  
+        - PolicyName: reboot
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:StartInstances
+                  - ec2:StopInstances
+                  - ec2:RebootInstances
+                  - ec2:DescribeInstances
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeTags
+                  - ec2:DescribeRouteTables
+                  - ec2:AssociateRouteTable
+                  - ec2:DisassociateRouteTable
+                  - ec2:ReplaceRouteTableAssociation
+                  - ec2:AllocateAddress
+                  - ec2:AssociateAddress
+                  - ec2:DisassociateAddress
+                  - ec2:ReleaseAddress
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:AttachNetworkInterface
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DetachNetworkInterface
+                  - ec2:ModifyNetworkInterfaceAttribute
+                  - ec2:ResetNetworkInterfaceAttribute
+                  - ec2:UnassignPrivateIpAddresses
+                  - ec2:ModifyInstanceAttribute
+                Resource: "*"
+        - PolicyName: routetable
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:ReplaceRoute
+                  - ec2:DeleteRoute
+                  - ec2:CreateRoute
+                Resource:
+                  !Sub 
+                    - "arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}"
+                    - RouteTableID: !Ref HARouteTable
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
@@ -362,9 +421,10 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        WaitHandle: !Ref WaitHandle
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
-    DependsOn: FirstNodeStack
+    DependsOn: WaitCondition
     Properties:
       TemplateURL:
         !Sub
@@ -391,7 +451,9 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        #add parameters to get instance ids of node1,2,3 with conditionals for fencing
+        Node1InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+        Node2InstanceId: !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.InstanceId, None]
+        Node3InstanceId: !If [Four, !GetAtt ExtraNode2Stack.Outputs.InstanceId, None]
   ExtraNode1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: ThreeOrFour
@@ -415,6 +477,7 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        WaitHandle: !Ref WaitHandle
   ExtraNode2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: Four
@@ -438,3 +501,4 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        WaitHandle: !Ref WaitHandle

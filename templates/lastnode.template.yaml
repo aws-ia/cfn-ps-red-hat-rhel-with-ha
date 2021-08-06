@@ -79,6 +79,15 @@ Parameters:
     Default: implementing/
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
+  Node1InstanceId:
+    Description: Instance ID of first RHEL instance, if exists
+    Type: String
+  Node2InstanceId:
+    Description: Instance ID of the second RHEL instance, if exists
+    Type: String
+  Node3InstanceId:
+    Description: Instance ID of the third RHEL instance, if exists
+    Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
@@ -132,7 +141,7 @@ Resources:
         hostname:
           commands:
             execute:
-              command: !Sub "sudo python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId}"
+              command: !Sub "sudo python3 get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId} ${Node1InstanceId} ${Node2InstanceId} ${Node3InstanceId}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -146,7 +155,7 @@ Resources:
           - |
             #cloud-config
             runcmd:
-              - ['sudo', 'dnf', '-y', 'install', 'wget', 'python3', 'python3-setuptools', 'python3-docutils']
+              - ['sudo', 'dnf', '-y', 'install', 'wget', 'python3', 'python3-setuptools', 'python3-docutils', 'awscli']
               - ['sudo', 'wget', "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz", -O, "/tmp/aws-cfn-bootstrap-py3-latest.tar.gz" ]
               - ['sudo', 'wget', '-O', '/tmp/pystache-0.5.4.tar.gz', 'https://files.pythonhosted.org/packages/d6/fd/eb8c212053addd941cc90baac307c00ac246ac3fce7166b86434c6eae963/pystache-0.5.4.tar.gz']
               - ['sudo', 'easy_install-3', '/tmp/pystache-0.5.4.tar.gz']

@@ -70,6 +70,8 @@ Parameters:
     Default: implementing/
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
+  WaitHandle:
+    Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
@@ -123,7 +125,7 @@ Resources:
         hostname:
           commands:
             execute:
-              command: !Sub "sudo python3 upload_hostname.py ${BucketName}"
+              command: !Sub "sudo python3 upload_hostname.py ${BucketName} node3 ${AWS::Region}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -137,10 +139,15 @@ Resources:
           - |
             #cloud-config
             runcmd:
-              - ['sudo', 'dnf', '-y', 'install', 'wget', 'python3', 'python3-setuptools', 'python3-docutils']
+              - ['sudo', 'dnf', '-y', 'install', 'wget', 'python3', 'python3-setuptools', 'python3-docutils', 'awscli']
               - ['sudo', 'wget', "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz", -O, "/tmp/aws-cfn-bootstrap-py3-latest.tar.gz" ]
               - ['sudo', 'wget', '-O', '/tmp/pystache-0.5.4.tar.gz', 'https://files.pythonhosted.org/packages/d6/fd/eb8c212053addd941cc90baac307c00ac246ac3fce7166b86434c6eae963/pystache-0.5.4.tar.gz']
               - ['sudo', 'easy_install-3', '/tmp/pystache-0.5.4.tar.gz']
               - ['sudo', 'easy_install-3', '--script-dir', '/usr/local/bin', '/tmp/aws-cfn-bootstrap-py3-latest.tar.gz']
               - ['sudo', '/usr/local/bin/cfn-init', '-v', '--stack', ${STACKNAME}, '--resource', 'RHELwithHAInstance', '--configsets', 'setup', '--region', ${REGION} ]
-          - { STACKNAME: !Ref 'AWS::StackName', REGION: !Ref 'AWS::Region' }
+              - ['sudo', '/usr/local/bin/cfn-signal', '${WAIT_HANDLE}']
+          - { STACKNAME: !Ref 'AWS::StackName', REGION: !Ref 'AWS::Region', WAIT_HANDLE: !Ref 'WaitHandle' }
+Outputs:
+  InstanceId:
+    Description: Instance ID of the EC2 Instance
+    Value: !Ref RHELwithHAInstance
