@@ -8,8 +8,12 @@ s3_client = boto3.client('s3')
 hostname = os.uname()[1]
 
 # sys.argv[1] = the bucket name to store the files
-# sys.argv[2] = the instance-id
+# sys.argv[2] = the node number
+# sys.argv[3] = the AWS region
 
-subprocess.call('touch $(hostname)', shell=True)
+filename = hostname + '+' + sys.argv[2]
 
-s3_client.upload_file('./' + hostname, sys.argv[1], 'hostnames/' + hostname)
+subprocess.call('touch $(hostname)' + '+' + sys.argv[2], shell=True)
+subprocess.call('sudo aws configure set default.region ' + sys.argv[3], shell=True)
+
+s3_client.upload_file('./' + filename, sys.argv[1], 'hostnames/' + filename)
