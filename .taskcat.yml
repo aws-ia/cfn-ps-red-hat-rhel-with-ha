@@ -1,6 +1,6 @@
 ---
 project:
-  owner: baechans@amazon.com
+  owner: quickstart-eng@amazon.com
   name: quickstart-rhel-with-ha
   regions:
     - us-east-1
@@ -9,11 +9,11 @@ tests:
     template: ./templates/main.template.yaml
     parameters:
       NodeOS: "RHEL8HA"
-      KeyPairName: "davmayd"
+      KeyPairName: "$[taskcat_getkeypair]"
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
       QSS3KeyPrefix: "quickstart-rhel-with-ha/"
       QSS3BucketName: '$[taskcat_autobucket]'
       QSS3BucketRegion: "$[taskcat_current_region]"
-      ClusterPassword: "anypassw123123"
+      ClusterPassword: "$[taskcat_genpass_8A]"
       RemoteAccessCIDR: "0.0.0.0/0"
