@@ -1,0 +1,509 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template sets up the basic framework for the RHEL with HA Quick Start. (qs-1s2mh2a9e)
+Parameters:
+  AvailabilityZones:
+    Description: List of Availability Zones to use for the subnets in the VPC. The logical order of
+      your selections is preserved.
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  ClusterPassword:
+    AllowedPattern: ^\S+$
+    ConstraintDescription: Password should not be empty or contain whitespace
+    Description: Password used for the user HACluster in the RHEL HA setup
+    Type: String
+    NoEcho: true
+  NumberOfAZs:
+    Description: Number of Availability Zones to use for the HA Cluster. This is same as the number of nodes that will be set up.
+    Type: String
+    Default: '3'
+    AllowedValues:
+      - '2'
+      - '3'
+      - '4'
+  InstanceType:
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - r4.large
+      - r4.xlarge
+      - r4.2xlarge
+      - r4.4xlarge
+      - r4.8xlarge
+    ConstraintDescription: "must be a valid EC2 instance type."
+    Default: t2.medium
+    Description: "EC2 instance type"
+    Type: String
+  KeyPairName:
+    ConstraintDescription: "Name of an existing EC2 KeyPair."
+    Type: "AWS::EC2::KeyPair::KeyName"
+  FloatingIPAddress:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
+    ConstraintDescription: IP Address must be in the form x.x.x.x
+    Description: Floating IP Address (MUST not be in any of the subnets)
+    Default: 10.1.1.0
+    Type: String
+  PrivateSubnet1CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.0.0/19
+    Description: CIDR block for private subnet 1 located in Availability Zone 1
+    Type: String
+  PrivateSubnet2CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.32.0/19
+    Description: CIDR block for private subnet 2 located in Availability Zone 2
+    Type: String
+  PrivateSubnet3CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.64.0/19
+    Description: CIDR block for private subnet 3 located in Availability Zone 3
+    Type: String
+  PrivateSubnet4CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.96.0/19
+    Description: CIDR block for private subnet 4 located in Availability Zone 4
+    Type: String
+  VPCCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.0.0/16
+    Description: CIDR block for the VPC
+    Type: String
+  RemoteAccessCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: Allowed CIDR block for external SSH access to the bastions
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: aws-quickstart
+    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: implementing/
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: String
+  NodeOS:
+    AllowedValues:
+      # - 'RHEL7HA'
+      - 'RHEL8HA'
+    ConstraintDescription: The QuickStart supports only RHEL7 and RHEL8 (Currently, only RHEL8 is supported due to aws-cfn-bootstrap)
+    Description: Version of RHEL with HA OS to use for the node instances
+    Default: 'RHEL8HA'
+    Type: String
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  Three:  !Equals [!Ref NumberOfAZs, "3"]
+  Four:   !Equals [!Ref NumberOfAZs, "4"]
+  ThreeOrFour: !Or [Condition: Three, Condition: Four]
+Mappings:
+  RHELami:
+    "us-east-1":
+      RHEL7HA: ami-098453baf108a57d0
+      RHEL8HA: ami-02e0bb36c61bb9715
+    "us-east-2":
+      RHEL7HA: ami-0dd38e30236fe14ea
+      RHEL8HA: ami-0b2e47f3b2e23d235
+    "us-west-1":
+      RHEL7HA: ami-0789e54ffc32dc9da
+      RHEL8HA: ami-054965c6cd7c6e462
+    "us-west-2":
+      RHEL7HA: ami-0171b09cf934fb33a
+      RHEL8HA: ami-0b28dfc7adc325ef4
+    "eu-west-1":
+      RHEL7HA: ami-0cfc6fb6e60e196f8
+      RHEL8HA: ami-0d81e223398b63904
+    "eu-west-2":
+      RHEL7HA: ami-053d6c7abdf54ce92
+      RHEL8HA: ami-09bf14849cf710ded
+    "eu-west-3":
+      RHEL7HA: ami-04917e48135204586
+      RHEL8HA: ami-08755c4342fb5aede
+    "eu-central-1":
+      RHEL7HA: ami-00cab56f55121d35b
+      RHEL8HA: ami-06ec8443c2a35b0ba
+    "eu-south-1":
+      RHEL7HA: ami-0c00b84d9b83462ee
+      RHEL8HA: ami-022d5f84fcef245d6
+    "eu-north-1":
+      RHEL7HA: ami-0ecf4056cdb23e820
+      RHEL8HA: ami-0baa9e2e64f3c00db
+    "ap-south-1":
+      RHEL7HA: ami-0c6e634411330b720
+      RHEL8HA: ami-06a0b4e3b7eb7a300
+    "ap-southeast-1":
+      RHEL7HA: ami-01d397c674caa615b
+      RHEL8HA: ami-0d6ba217f554f6137
+    "ap-southeast-2":
+      RHEL7HA: ami-07fd71119129438ff
+      RHEL8HA: ami-016461ac55b16fd05
+    "ap-northeast-1":
+      RHEL7HA: ami-05b2d9fe3b21d7d99
+      RHEL8HA: ami-0cf31bd68732fb0e2
+    "ap-northeast-2":
+      RHEL7HA: ami-09638d3117628fe1e
+      RHEL8HA: ami-0bb1758bf5a69ca5c
+    "ap-northeast-3":
+      RHEL7HA: ami-0b03f51a693ae65a5
+      RHEL8HA: ami-08daa4649f61b8684
+    "ap-east-1":
+      RHEL7HA: ami-0f4a6eba1c2a4cf75
+      RHEL8HA: ami-0bd4a3e0dc2940f8b
+    "af-south-1":
+      RHEL7HA: ami-0c4f78f1fd5926d4b
+      RHEL8HA: ami-054b87e0abc89db2b
+    "me-south-1":
+      RHEL7HA: ami-0ae0e0da2a1a21c28
+      RHEL8HA: ami-000511140e17c0c0c
+    "sa-east-1":
+      RHEL7HA: ami-066bae248b2be862c
+      RHEL8HA: ami-0a0013406b4d60022
+    "ca-central-1":
+      RHEL7HA: ami-030c9fd94feef0f25
+      RHEL8HA: ami-0277fbe7afa8a33a6
+Resources:
+  VPCStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        AvailabilityZones: !Join 
+          - ','
+          - !Ref AvailabilityZones
+        NumberOfAZs: !Ref NumberOfAZs
+        PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
+        PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
+        PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
+        PrivateSubnet4ACIDR: !Ref PrivateSubnet4CIDR
+        VPCCIDR: !Ref VPCCIDR
+  BastionStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
+        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        RemoteAccessCIDR: !Ref RemoteAccessCIDR
+        KeyPairName: !Ref KeyPairName
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix:
+          Fn::Sub: ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
+  WaitHandle:
+    Type: 'AWS::CloudFormation::WaitConditionHandle'
+  WaitCondition:
+    Type: 'AWS::CloudFormation::WaitCondition'
+    DependsOn: VPCStack
+    Properties:
+      Handle: !Ref WaitHandle
+      Count: !If [Four, 3, !If [Three, 2, 1]]
+      Timeout: '3600'
+  HARouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  HARoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: HARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  NATRouteTable1:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  NATRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+      RouteTableId: !Ref NATRouteTable1
+  NATRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+       RouteTableId:
+         Ref: NATRouteTable1
+       DestinationCidrBlock: 0.0.0.0/0
+       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway1ID   
+  NATRouteTable2:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  NATRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+      RouteTableId: !Ref NATRouteTable2
+  NATRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+       RouteTableId:
+         Ref: NATRouteTable2
+       DestinationCidrBlock: 0.0.0.0/0
+       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway2ID   
+  NATRouteTable3:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: ThreeOrFour
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  NATRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: ThreeOrFour
+    Properties:
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+      RouteTableId: !Ref NATRouteTable3
+  NATRoute3:
+    Type: AWS::EC2::Route
+    Condition: ThreeOrFour
+    Properties:
+       RouteTableId:
+         Ref: NATRouteTable3
+       DestinationCidrBlock: 0.0.0.0/0
+       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway3ID   
+  NATRouteTable4:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: Four
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+  NATRouteTableAssociation4:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Four
+    Properties:
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
+      RouteTableId: !Ref NATRouteTable4
+  NATRoute4:
+    Type: AWS::EC2::Route
+    Condition: Four
+    Properties:
+       RouteTableId:
+         Ref: NATRouteTable4
+       DestinationCidrBlock: 0.0.0.0/0
+       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway4ID   
+  ClusterSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Sets up inbound rule for communication among nodes'
+      VpcId: !GetAtt VPCStack.Outputs.VPCID 
+      SecurityGroupIngress:
+        - IpProtocol: '-1'
+          CidrIp: !Ref VPCCIDR
+  HostnameBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+  ClusterRole:
+    Type: 'AWS::IAM::Role'
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - EIAMPolicyWildcardResource #Policy is architected for least privilege; EC2 instances must be able to interact with one another
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: "Allows access to the S3 bucket"
+      Path: /
+      Policies: #add policy for fencing
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: 
+                  - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}/*'
+                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]
+                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]  
+        - PolicyName: reboot
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:StartInstances
+                  - ec2:StopInstances
+                  - ec2:RebootInstances
+                  - ec2:DescribeInstances
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeTags
+                  - ec2:DescribeRouteTables
+                  - ec2:AssociateRouteTable
+                  - ec2:DisassociateRouteTable
+                  - ec2:ReplaceRouteTableAssociation
+                  - ec2:AllocateAddress
+                  - ec2:AssociateAddress
+                  - ec2:DisassociateAddress
+                  - ec2:ReleaseAddress
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:AttachNetworkInterface
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DetachNetworkInterface
+                  - ec2:ModifyNetworkInterfaceAttribute
+                  - ec2:ResetNetworkInterfaceAttribute
+                  - ec2:UnassignPrivateIpAddresses
+                  - ec2:ModifyInstanceAttribute
+                Resource: "*"
+        - PolicyName: routetable
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:ReplaceRoute
+                  - ec2:DeleteRoute
+                  - ec2:CreateRoute
+                Resource:
+                  !Sub 
+                    - "arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}"
+                    - RouteTableID: !Ref HARouteTable
+  ClusterInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ClusterRole
+  FirstNodeStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/firstnode.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
+        ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        WaitHandle: !Ref WaitHandle
+  LastNodeStack:
+    Type: 'AWS::CloudFormation::Stack'
+    DependsOn: WaitCondition
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/lastnode.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Tags:
+        - Key: Node2Name
+          Value: !If [ThreeOrFour, !Ref ExtraNode1Stack, None]
+        - Key: Node3Name
+          Value: !If [Four, !Ref ExtraNode2Stack, None]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
+        ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
+        FloatingIPAddress: !Ref FloatingIPAddress
+        RouteTableId: !Ref HARouteTable
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        Node1InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+        Node2InstanceId: !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.InstanceId, None]
+        Node3InstanceId: !If [Four, !GetAtt ExtraNode2Stack.Outputs.InstanceId, None]
+  ExtraNode1Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: ThreeOrFour
+    DependsOn: FirstNodeStack
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/extranode1.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
+        ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        WaitHandle: !Ref WaitHandle
+  ExtraNode2Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: Four
+    DependsOn: ExtraNode1Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/extranode2.template.yaml
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
+        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
+        ClusterPassword: !Ref ClusterPassword
+        BucketName: !Ref HostnameBucket
+        ClusterRole: !Ref ClusterRole
+        ClusterProfile: !Ref ClusterInstanceProfile
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        WaitHandle: !Ref WaitHandle
