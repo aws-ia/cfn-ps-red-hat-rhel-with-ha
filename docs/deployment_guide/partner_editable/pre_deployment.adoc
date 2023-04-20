@@ -1,3 +1,16 @@
 //Include any predeployment steps here, such as signing up for a Marketplace AMI or making any changes to a partner account. If there are no predeployment steps, leave this file empty.
 
-== Predeployment steps
+This Deployment requires a moderate level of familiarity with AWS services. If you’re new to AWS, see https://aws.amazon.com/getting-started/[Getting Started Resource Center^] and AWS https://aws.amazon.com/training/[Training and Certification^]. These sites provide materials for learning how to design, deploy, and operate your infrastructure and applications on the AWS Cloud.
+
+
+AWS account
+
+If you don’t already have an AWS account, create one at https://aws.amazon.com by following the on-screen instructions. Part of the sign-up process involves receiving a phone call and entering a PIN using the phone keypad.
+
+Your AWS account is automatically signed up for all AWS services. You are charged only for the services you use.
+
+
+Resource quotas
+
+If necessary, request https://console.aws.amazon.com/servicequotas/home?region=us-east-2#!/[service quota increases^] for the following resources. You might request quota increases to avoid exceeding the default limits for any resources that are shared across multiple deployments. The https://console.aws.amazon.com/servicequotas/home?region=us-east-2#!/[Service Quotas console^] displays your usage and quotas for some aspects of some services. For more information, see What is https://docs.aws.amazon.com/servicequotas/latest/userguide/intro.html[Service Quotas?^] and https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html[AWS Service Quotas^].
+

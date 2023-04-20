@@ -1,5 +1,11 @@
-This Quick Start deploys {partner-product-name} on the AWS Cloud. If you are unfamiliar with AWS Quick Starts, refer to the https://fwd.aws/rA69w?[AWS Quick Start General Information Guide^].
+This Partner Solution deploys RHEL with HA APN on the AWS Cloud. If you are unfamiliar with AWS Partner Solutions, refer to the https://fwd.aws/rA69w?[AWS Partner Solution General Information Guide^].
 
-// For advanced information about the product that this Quick Start deploys, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/operational/index.html[Operational Guide^].
+High Availability for a service focuses on ensuring the system can operate with the best performance even when part of the system fails.  
+Availability refers to the percentage of time that the infrastructure, system, or solution remains operational under normal circumstances in order to serve its intended purpose. High availability refers to the ability to avoid unplanned outages by eliminating single-point-of-failure (SPOF). 
+The amount of “nines” is often used to indicate high availability, for example, Amazon EC2 Single-AZ Data Plane has 99,95% (3 nines) of Availability while Amazon EC2 Multi-AZ Data Plane has 99,99% (4 nines) of Availability.
 
-// For information about using this Quick Start for migrations, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/migration/index.html[Migration Guide^].
+
+
+// For advanced information about the product that this Partner Solution deploys, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/operational/index.html[Operational Guide^].
+
+// For information about using this Partner Solution for migrations, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/migration/index.html[Migration Guide^].

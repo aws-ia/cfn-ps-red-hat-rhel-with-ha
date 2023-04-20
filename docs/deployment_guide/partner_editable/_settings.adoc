@@ -1,4 +1,4 @@
-:quickstart-project-name: quickstart-repo-name
+:quickstart-project-name: partnersolution-rhel-with-ha
 :quickstart-github-org: aws-quickstart
 :partner-product-name: Full Product Name
 :partner-product-short-name: Product Name
