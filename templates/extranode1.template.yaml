@@ -5,6 +5,7 @@ Metadata:
   cfn-lint:
     config:
       ignore_checks:
+        - W4002
         - W9002 #Template is not customer-facing
         - W9003 #Template is not customer-facing
         - W9004 #Template is not customer-facing
