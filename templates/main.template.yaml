@@ -1,6 +1,67 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template sets up the basic framework for the RHEL with HA Quick Start. (qs-1s2mh2a9e)
+Description: This template sets up the basic framework for the RHEL with HA Partner Solution. (qs-1s2mh2a9e)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network configuration
+        Parameters:
+          - AvailabilityZones
+          - NumberOfAZs
+          - VPCCIDR
+          - PrivateSubnet1CIDR
+          - PrivateSubnet2CIDR
+          - PrivateSubnet3CIDR
+          - PrivateSubnet4CIDR
+          - RemoteAccessCIDR
+      - Label:
+          default: Amazon EC2 configuration
+        Parameters:
+          - InstanceType
+          - KeyPairName
+          - NodeOS
+          - FloatingIPAddress
+          - ClusterPassword
+      - Label:
+          default: AWS Partner Solution configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      ClusterPassword:
+        default: Cluster Password
+      FloatingIPAddress:
+        default: Floating IP Address
+      InstanceType:
+        default: Instance Type
+      KeyPairName:
+        default: Key Pair Name
+      NodeOS:
+        default: Node OS
+      NumberOfAZs:
+        default: Number of Availability Zones
+      PrivateSubnet1CIDR:
+        default: Private Subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private Subnet 2 CIDR
+      PrivateSubnet3CIDR:
+        default: Private Subnet 3 CIDR
+      PrivateSubnet4CIDR:
+        default: Private Subnet 4 CIDR
+      RemoteAccessCIDR:
+        default: Remote Access CIDR
+      QSS3BucketName:
+        default: Partner Solution S3 Bucket Name
+      QSS3BucketRegion:
+        default: Partner Solution S3 Bucket Region
+      QSS3KeyPrefix:
+        default: Partner Solution S3 Key Prefix
+      VPCCIDR:
+        default: VPC CIDR
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones to use for the subnets in the VPC. The logical order of
@@ -47,6 +108,7 @@ Parameters:
     Type: String
   KeyPairName:
     ConstraintDescription: "Name of an existing EC2 KeyPair."
+    Description: Public/private key pairs allow you to securely connect to your instance after it launches
     Type: "AWS::EC2::KeyPair::KeyName"
   FloatingIPAddress:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
@@ -91,19 +153,19 @@ Parameters:
     Type: String
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
-    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    ConstraintDescription: "Partner Solution bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Default: aws-quickstart
-    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Description: "S3 bucket name for the Partner Solution assets. Partner Solution bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: String
   QSS3BucketRegion:
     Default: 'us-east-1'
-    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Description: 'The AWS Region where the Partner Solution S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
-    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    ConstraintDescription: "Partner Solution key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Default: implementing/
-    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Description: "S3 key prefix for the Partner Solution assets. Partner Solution key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
   NodeOS:
     AllowedValues:
