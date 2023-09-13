@@ -8,7 +8,7 @@ tests:
   default:
     template: ./templates/main.template.yaml
     parameters:
-      NodeOS: "RHEL8HA"
+      NodeOS: "RHELHA88HVM"
       KeyPairName: "$[taskcat_getkeypair]"
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
