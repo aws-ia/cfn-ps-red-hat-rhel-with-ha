@@ -221,7 +221,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "eu-west-1":
+    "af-south-1":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -229,7 +229,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "eu-west-2":
+    "ap-east-1":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -237,7 +237,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "eu-west-3":
+    "ap-south-2":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -245,7 +245,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "eu-central-1":
+    "ap-southeast-3":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -253,15 +253,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "eu-south-1":
-      RHELHA85HVM: ""
-      RHELHA86HVM: ""
-      RHELHA87HVM: ""
-      RHELHA88HVM: ""
-      RHELHA90HVM: ""
-      RHELHA91HVM: ""
-      RHELHA92HVM: ""
-    "eu-north-1":
+    "ap-southeast-4":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -270,6 +262,22 @@ Mappings:
       RHELHA91HVM: ""
       RHELHA92HVM: ""
     "ap-south-1":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "ap-northeast-3":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "ap-northeast-2":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -301,7 +309,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "ap-northeast-2":
+    "ca-central-1":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -309,7 +317,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "ap-northeast-3":
+    "eu-central-1":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -317,7 +325,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "ap-east-1":
+    "eu-west-1":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -325,7 +333,47 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "af-south-1":
+    "eu-west-2":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "eu-south-1":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "eu-west-3":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "eu-south-2":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "eu-north-1":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "eu-central-2":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -341,7 +389,7 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "sa-east-1":
+    "me-central-1":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
@@ -349,7 +397,15 @@ Mappings:
       RHELHA90HVM: ""
       RHELHA91HVM: ""
       RHELHA92HVM: ""
-    "ca-central-1":
+    "il-central-1":
+      RHELHA85HVM: ""
+      RHELHA86HVM: ""
+      RHELHA87HVM: ""
+      RHELHA88HVM: ""
+      RHELHA90HVM: ""
+      RHELHA91HVM: ""
+      RHELHA92HVM: ""
+    "sa-east-1":
       RHELHA85HVM: ""
       RHELHA86HVM: ""
       RHELHA87HVM: ""
