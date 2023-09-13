@@ -181,7 +181,7 @@ Conditions:
   Four:   !Equals [!Ref NumberOfAZs, "4"]
   ThreeOrFour: !Or [Condition: Three, Condition: Four]
 Mappings:
-  RHELami:
+  AWSAMIRegionMap:
     "us-east-1":
       RHEL7HA: ami-098453baf108a57d0
       RHEL8HA: ami-02e0bb36c61bb9715
@@ -500,7 +500,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
@@ -528,7 +528,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
@@ -556,7 +556,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
@@ -580,7 +580,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
