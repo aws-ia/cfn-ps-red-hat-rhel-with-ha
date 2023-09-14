@@ -169,11 +169,15 @@ Parameters:
     Type: String
   NodeOS:
     AllowedValues:
-      # - 'RHEL7HA'
-      - 'RHEL8HA'
-    ConstraintDescription: The QuickStart supports only RHEL7 and RHEL8 (Currently, only RHEL8 is supported due to aws-cfn-bootstrap)
+      - 'RHELHA86HVM'
+      - 'RHELHA87HVM'
+      - 'RHELHA88HVM'
+      - 'RHELHA90HVM'
+      - 'RHELHA91HVM'
+      - 'RHELHA92HVM'
+    ConstraintDescription: The QuickStart supports RHEL8 and RHEL9
     Description: Version of RHEL with HA OS to use for the node instances
-    Default: 'RHEL8HA'
+    Default: 'RHELHA88HVM'
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
@@ -181,91 +185,203 @@ Conditions:
   Four:   !Equals [!Ref NumberOfAZs, "4"]
   ThreeOrFour: !Or [Condition: Three, Condition: Four]
 Mappings:
-  RHELami:
+  AWSAMIRegionMap:
     "us-east-1":
-      RHEL7HA: ami-098453baf108a57d0
-      RHEL8HA: ami-02e0bb36c61bb9715
-      RHEL9HA: ami-02978b79564e08f2f
+      RHELHA86HVM: "ami-0d24b5d367ff2557b"
+      RHELHA87HVM: "ami-036333d7d902c93ec"
+      RHELHA88HVM: "ami-050aa53cc9e0aa492"
+      RHELHA90HVM: "ami-02898b32d4329ad3d"
+      RHELHA91HVM: "ami-074186d8abe62d212"
+      RHELHA92HVM: "ami-0ab9230aca57ec95b"
     "us-east-2":
-      RHEL7HA: ami-0dd38e30236fe14ea
-      RHEL8HA: ami-0b2e47f3b2e23d235
-      RHEL9HA: ami-0a04068a95e6a1cde
+      RHELHA86HVM: "ami-0188af8f4e83db18b"
+      RHELHA87HVM: "ami-09841bb1ddf22956e"
+      RHELHA88HVM: "ami-028295e14d693d0c8"
+      RHELHA90HVM: "ami-09553de4665ef9e23"
+      RHELHA91HVM: "ami-0b71c648601ed9bba"
+      RHELHA92HVM: "ami-0e2fb9aa01c471d03"
     "us-west-1":
-      RHEL7HA: ami-0789e54ffc32dc9da
-      RHEL8HA: ami-054965c6cd7c6e462
-      RHEL9HA: ami-0dc50976db563e50a
+      RHELHA86HVM: "ami-0b671ecdb7ed05707"
+      RHELHA87HVM: "ami-05766ebf135a22e64"
+      RHELHA88HVM: "ami-09ddadb299dba2208"
+      RHELHA90HVM: "ami-0d4fb231698962560"
+      RHELHA91HVM: "ami-0e1d6a6550d707a45"
+      RHELHA92HVM: "ami-03ebab98963354f17"
     "us-west-2":
-      RHEL7HA: ami-0171b09cf934fb33a
-      RHEL8HA: ami-0b28dfc7adc325ef4
-      RHEL9HA: ami-019866531dac971b9
-    "eu-west-1":
-      RHEL7HA: ami-0cfc6fb6e60e196f8
-      RHEL8HA: ami-0d81e223398b63904
-      RHEL9HA: ami-017d70213b2dbe508
-    "eu-west-2":
-      RHEL7HA: ami-053d6c7abdf54ce92
-      RHEL8HA: ami-09bf14849cf710ded
-      RHEL9HA: ami-0952d71efe9366064
-    "eu-west-3":
-      RHEL7HA: ami-04917e48135204586
-      RHEL8HA: ami-08755c4342fb5aede
-      RHEL9HA: ami-07b51a8e58bf6755d
-    "eu-central-1":
-      RHEL7HA: ami-00cab56f55121d35b
-      RHEL8HA: ami-06ec8443c2a35b0ba
-      RHEL9HA: ami-00f136ac48acf2618
-    "eu-south-1":
-      RHEL7HA: ami-0c00b84d9b83462ee
-      RHEL8HA: ami-022d5f84fcef245d6
-      RHEL9HA: ami-05c5f0ed79cc42eee
-    "eu-north-1":
-      RHEL7HA: ami-0ecf4056cdb23e820
-      RHEL8HA: ami-0baa9e2e64f3c00db
-      RHEL9HA: ami-0232b5b69baa22da3
-    "ap-south-1":
-      RHEL7HA: ami-0c6e634411330b720
-      RHEL8HA: ami-06a0b4e3b7eb7a300
-      RHEL9HA: ami-0466079baeb1010da
-    "ap-southeast-1":
-      RHEL7HA: ami-01d397c674caa615b
-      RHEL8HA: ami-0d6ba217f554f6137
-      RHEL9HA: ami-04ba270ccd8098407
-    "ap-southeast-2":
-      RHEL7HA: ami-07fd71119129438ff
-      RHEL8HA: ami-016461ac55b16fd05
-      RHEL9HA: ami-07dba8e4546543211
-    "ap-northeast-1":
-      RHEL7HA: ami-05b2d9fe3b21d7d99
-      RHEL8HA: ami-0cf31bd68732fb0e2
-      RHEL9HA: ami-0dcb1703d648a942f
-    "ap-northeast-2":
-      RHEL7HA: ami-09638d3117628fe1e
-      RHEL8HA: ami-0bb1758bf5a69ca5c
-      RHEL9HA: ami-0b6f6543c11f4ab41
-    "ap-northeast-3":
-      RHEL7HA: ami-0b03f51a693ae65a5
-      RHEL8HA: ami-08daa4649f61b8684
-      RHEL9HA: ami-0958b319e20935da2
-    "ap-east-1":
-      RHEL7HA: ami-0f4a6eba1c2a4cf75
-      RHEL8HA: ami-0bd4a3e0dc2940f8b
-      RHEL9HA: ami-0c5380960dac0cf50
+      RHELHA86HVM: "ami-0e87f3b5fb0ea5a5a"
+      RHELHA87HVM: "ami-03ecf7945c1ad43dc"
+      RHELHA88HVM: "ami-05ef7669d628b646f"
+      RHELHA90HVM: "ami-0592594e3954e6309"
+      RHELHA91HVM: "ami-049340ce5c8942268"
+      RHELHA92HVM: "ami-0990b0a747730fea3"
     "af-south-1":
-      RHEL7HA: ami-0c4f78f1fd5926d4b
-      RHEL8HA: ami-054b87e0abc89db2b
-      RHEL9HA: ami-0928ce4eb960c93d4
-    "me-south-1":
-      RHEL7HA: ami-0ae0e0da2a1a21c28
-      RHEL8HA: ami-000511140e17c0c0c
-      RHEL9HA: ami-0f0aaa9261b5a3967
-    "sa-east-1":
-      RHEL7HA: ami-066bae248b2be862c
-      RHEL8HA: ami-0a0013406b4d60022
-      RHEL9HA: ami-0b3c794a454788ac7
+      RHELHA86HVM: "ami-0f8fc90496d4970b8"
+      RHELHA87HVM: "ami-0a10725be8e755aeb"
+      RHELHA88HVM: "ami-06cef80059b5663c0"
+      RHELHA90HVM: "ami-02c1323b15ae00953"
+      RHELHA91HVM: "ami-017e2978f5f3d9b04"
+      RHELHA92HVM: "ami-0520f659e63241c65"
+    "ap-east-1":
+      RHELHA86HVM: "ami-035f582573bf5877e"
+      RHELHA87HVM: "ami-0b69f3ff511f9d0f6"
+      RHELHA88HVM: "ami-0bb1f57f0e045461b"
+      RHELHA90HVM: "ami-04be3d35b838f80cb"
+      RHELHA91HVM: "ami-08e05e87c9d957572"
+      RHELHA92HVM: "ami-06778dfc839154edd"
+    "ap-south-2":
+      RHELHA86HVM: "ami-0e0349b9b57372a4d"
+      RHELHA87HVM: "ami-09ff0519936c83836"
+      RHELHA88HVM: "ami-092056bf18b946454"
+      RHELHA90HVM: "ami-073fbaf0edfbf5458"
+      RHELHA91HVM: "ami-02f61d563e8e3b0e9"
+      RHELHA92HVM: "ami-06668f2c68258ab61"
+    "ap-southeast-3":
+      RHELHA86HVM: "ami-08cc4a56222fd0b3d"
+      RHELHA87HVM: "ami-0a0864eb978c2d9a6"
+      RHELHA88HVM: "ami-0b56f7fcd88f262c2"
+      RHELHA90HVM: "ami-0a98199b16722b76b"
+      RHELHA91HVM: "ami-0e19e798350aba525"
+      RHELHA92HVM: "ami-04b228f4b6daff6b7"
+    "ap-southeast-4":
+      RHELHA86HVM: "ami-074b00b5d7c0673ec"
+      RHELHA87HVM: "ami-0d75df347f957ef05"
+      RHELHA88HVM: "ami-0221a0d28ed3b7235"
+      RHELHA90HVM: "ami-048772c9cc8e18e55"
+      RHELHA91HVM: "ami-0ae7b9f4aeb5dc3db"
+      RHELHA92HVM: "ami-0c327a414b4e7ae9f"
+    "ap-south-1":
+      RHELHA86HVM: "ami-0f9d278ace56d0b19"
+      RHELHA87HVM: "ami-03a9ee30359cf4bc8"
+      RHELHA88HVM: "ami-0936dc60a13fc6006"
+      RHELHA90HVM: "ami-0b630abb20df12556"
+      RHELHA91HVM: "ami-0ceed8aa68032d786"
+      RHELHA92HVM: "ami-0125034387f25f530"
+    "ap-northeast-3":
+      RHELHA86HVM: "ami-0261a5083740f9c6d"
+      RHELHA87HVM: "ami-0dac0d480260d49ea"
+      RHELHA88HVM: "ami-0a6ab462aa150e37f"
+      RHELHA90HVM: "ami-0b766e0e9fb2cd32e"
+      RHELHA91HVM: "ami-0fb8ef2bab4d0f25f"
+      RHELHA92HVM: "ami-0dd09774ab7b0fc01"
+    "ap-northeast-2":
+      RHELHA86HVM: "ami-023414b233fb79cfa"
+      RHELHA87HVM: "ami-0f7e6b829c9ae3cbf"
+      RHELHA88HVM: "ami-0e4aaa29f895cfa19"
+      RHELHA90HVM: "ami-025153f48332a8de0"
+      RHELHA91HVM: "ami-0d97a779db5c3a765"
+      RHELHA92HVM: "ami-06f62b9665b531042"
+    "ap-southeast-1":
+      RHELHA86HVM: "ami-0b2b7d0ec00bc1f04"
+      RHELHA87HVM: "ami-0fec7f284a6c8f885"
+      RHELHA88HVM: "ami-085435f7aac0634a8"
+      RHELHA90HVM: "ami-0ee8e0ab62f80a9a7"
+      RHELHA91HVM: "ami-09220bc6585571378"
+      RHELHA92HVM: "ami-001b1f151fbd9806d"
+    "ap-southeast-2":
+      RHELHA86HVM: "ami-0f4030bf747d59345"
+      RHELHA87HVM: "ami-0a2c2699752f4bb02"
+      RHELHA88HVM: "ami-06041d957b46a4555"
+      RHELHA90HVM: "ami-0c6363a909c56dd67"
+      RHELHA91HVM: "ami-0ad753ecaec382cf6"
+      RHELHA92HVM: "ami-026f18b45ff612222"
+    "ap-northeast-1":
+      RHELHA86HVM: "ami-0347f46bc0ff51259"
+      RHELHA87HVM: "ami-037363e0794e85af0"
+      RHELHA88HVM: "ami-0ef1a8873958b3312"
+      RHELHA90HVM: "ami-05df9b7e4bf893c78"
+      RHELHA91HVM: "ami-0f555304fa64a5762"
+      RHELHA92HVM: "ami-0dd3399e16f4dc24e"
     "ca-central-1":
-      RHEL7HA: ami-030c9fd94feef0f25
-      RHEL8HA: ami-0277fbe7afa8a33a6
-      RHEL9HA: ami-097bd6037de54b1dc
+      RHELHA86HVM: "ami-014a1bfbde981b3c2"
+      RHELHA87HVM: "ami-03f59df645b6ce5c5"
+      RHELHA88HVM: "ami-0353f0ea08c9c01cf"
+      RHELHA90HVM: "ami-03528db39397db695"
+      RHELHA91HVM: "ami-0149d341ad9957d39"
+      RHELHA92HVM: "ami-03467364e223a95ae"
+    "eu-central-1":
+      RHELHA86HVM: "ami-02e624650a8f7f6ee"
+      RHELHA87HVM: "ami-02da1af10c90eaa04"
+      RHELHA88HVM: "ami-09bd54779f97aa2e1"
+      RHELHA90HVM: "ami-0417280d3037edfd6"
+      RHELHA91HVM: "ami-087a3abf6f4f4625c"
+      RHELHA92HVM: "ami-0da09574793dfada7"
+    "eu-west-1":
+      RHELHA86HVM: "ami-00bf77eb51a5ea903"
+      RHELHA87HVM: "ami-028672500b94cb531"
+      RHELHA88HVM: "ami-0b4c02c04b2cc0b20"
+      RHELHA90HVM: "ami-0415e1857890cffd6"
+      RHELHA91HVM: "ami-054b35f3f241e5acc"
+      RHELHA92HVM: "ami-0212f613623e800d0"
+    "eu-west-2":
+      RHELHA86HVM: "ami-06be95d00d9965f43"
+      RHELHA87HVM: "ami-015efc604a6ae0078"
+      RHELHA88HVM: "ami-08825379d82045a56"
+      RHELHA90HVM: "ami-0fd10df294e38be27"
+      RHELHA91HVM: "ami-05e0096c5124b6490"
+      RHELHA92HVM: "ami-0be99727a9f5d77e8"
+    "eu-south-1":
+      RHELHA86HVM: "ami-0242fd7925e40a70a"
+      RHELHA87HVM: "ami-0a9842840ba3e9363"
+      RHELHA88HVM: "ami-0812ef84d7e4f593e"
+      RHELHA90HVM: "ami-0b9168d8d95918dd3"
+      RHELHA91HVM: "ami-0d171a386e57ac9fe"
+      RHELHA92HVM: "ami-0a13115dbd189ab1a"
+    "eu-west-3":
+      RHELHA86HVM: "ami-0fb0bac4ae236fda7"
+      RHELHA87HVM: "ami-0ac5164c51cd393bc"
+      RHELHA88HVM: "ami-081d2bb49029ad39d"
+      RHELHA90HVM: "ami-0280ef6e6b4797ef0"
+      RHELHA91HVM: "ami-045e4f0a801840daf"
+      RHELHA92HVM: "ami-0dbfca1951c4d4f54"
+    "eu-south-2":
+      RHELHA86HVM: "ami-070f84deef6c5530d"
+      RHELHA87HVM: "ami-06171e34781f8dffc"
+      RHELHA88HVM: "ami-0d0f2370e292cd06f"
+      RHELHA90HVM: "ami-08d473b2387bac871"
+      RHELHA91HVM: "ami-036faaeb08f436e48"
+      RHELHA92HVM: "ami-0d835b01edf07bff0"
+    "eu-north-1":
+      RHELHA86HVM: "ami-022d38fa78f822277"
+      RHELHA87HVM: "ami-0e052b800f9990724"
+      RHELHA88HVM: "ami-0541c4d37182fa0ec"
+      RHELHA90HVM: "ami-0d277ce2cf6c2f209"
+      RHELHA91HVM: "ami-0f23f66f6e836c9e0"
+      RHELHA92HVM: "ami-0c09d1b852ebcf02a"
+    "eu-central-2":
+      RHELHA86HVM: "ami-0d15eec683278840d"
+      RHELHA87HVM: "ami-04cd1d8ea4e42cdbb"
+      RHELHA88HVM: "ami-019d04c0158876bcc"
+      RHELHA90HVM: "ami-0abfd643666f06114"
+      RHELHA91HVM: "ami-0ad6de85a8b717c26"
+      RHELHA92HVM: "ami-0760cf87a17fe799b"
+    "me-south-1":
+      RHELHA86HVM: "ami-0195aa893674b239e"
+      RHELHA87HVM: "ami-06a8eab76969a2e35"
+      RHELHA88HVM: "ami-0824d5bc90d7b7439"
+      RHELHA90HVM: "ami-02bb7bc554e6741f3"
+      RHELHA91HVM: "ami-08371f099a68d7db1"
+      RHELHA92HVM: "ami-0f52fb797dde47592"
+    "me-central-1":
+      RHELHA86HVM: "ami-0d4014836a983ffcf"
+      RHELHA87HVM: "ami-0e9648741d23a3f91"
+      RHELHA88HVM: "ami-006a1fedc0f447490"
+      RHELHA90HVM: "ami-06f3e998050c35eaa"
+      RHELHA91HVM: "ami-088c0ae9b55441ff0"
+      RHELHA92HVM: "ami-0503d842d8321fa61"
+    "il-central-1":
+      RHELHA86HVM: "ami-0d6e4e93884db4161"
+      RHELHA87HVM: "ami-08696693c7aef53ce"
+      RHELHA88HVM: "ami-0e6705a4ac4bc31bf"
+      RHELHA90HVM: "ami-07fbe4df3f873d9ee"
+      RHELHA91HVM: "ami-0180664ef9cc34f7b"
+      RHELHA92HVM: "ami-04e8a133ebedb4585"
+    "sa-east-1":
+      RHELHA86HVM: "ami-0218cb0718377daf7"
+      RHELHA87HVM: "ami-0fbccb1e5edbfb522"
+      RHELHA88HVM: "ami-00763bbaacce9c919"
+      RHELHA90HVM: "ami-0929b5ddf31109a87"
+      RHELHA91HVM: "ami-0551b09f7806de834"
+      RHELHA92HVM: "ami-0bde8987b0ecc3bf8"
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -500,7 +616,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
@@ -528,7 +644,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
@@ -556,7 +672,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
@@ -580,7 +696,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
-        ImageId: !FindInMap [RHELami, !Ref "AWS::Region", !Ref NodeOS]
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         BucketName: !Ref HostnameBucket
