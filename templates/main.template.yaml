@@ -169,9 +169,6 @@ Parameters:
     Type: String
   NodeOS:
     AllowedValues:
-      - 'RHELHA83HVM'
-      - 'RHELHA84HVM'
-      - 'RHELHA85HVM'
       - 'RHELHA86HVM'
       - 'RHELHA87HVM'
       - 'RHELHA88HVM'
@@ -190,8 +187,6 @@ Conditions:
 Mappings:
   AWSAMIRegionMap:
     "us-east-1":
-      RHELHA84HVM: "ami-0c7598841d2dba4f4"
-      RHELHA85HVM: "ami-0bd50e308e4cf942a"
       RHELHA86HVM: "ami-0d24b5d367ff2557b"
       RHELHA87HVM: "ami-036333d7d902c93ec"
       RHELHA88HVM: "ami-050aa53cc9e0aa492"
@@ -199,8 +194,6 @@ Mappings:
       RHELHA91HVM: "ami-074186d8abe62d212"
       RHELHA92HVM: "ami-0ab9230aca57ec95b"
     "us-east-2":
-      RHELHA84HVM: "ami-05d7acad43cc25c0e"
-      RHELHA85HVM: "ami-0373edad71cbe2056"
       RHELHA86HVM: "ami-0188af8f4e83db18b"
       RHELHA87HVM: "ami-09841bb1ddf22956e"
       RHELHA88HVM: "ami-028295e14d693d0c8"
@@ -208,8 +201,6 @@ Mappings:
       RHELHA91HVM: "ami-0b71c648601ed9bba"
       RHELHA92HVM: "ami-0e2fb9aa01c471d03"
     "us-west-1":
-      RHELHA84HVM: "ami-046d5b24812717b95"
-      RHELHA85HVM: "ami-0b70b49e66e84a286"
       RHELHA86HVM: "ami-0b671ecdb7ed05707"
       RHELHA87HVM: "ami-05766ebf135a22e64"
       RHELHA88HVM: "ami-09ddadb299dba2208"
@@ -217,8 +208,6 @@ Mappings:
       RHELHA91HVM: "ami-0e1d6a6550d707a45"
       RHELHA92HVM: "ami-03ebab98963354f17"
     "us-west-2":
-      RHELHA84HVM: "ami-031a0a09466c285de"
-      RHELHA85HVM: "ami-031308a6368ea604e"
       RHELHA86HVM: "ami-0e87f3b5fb0ea5a5a"
       RHELHA87HVM: "ami-03ecf7945c1ad43dc"
       RHELHA88HVM: "ami-05ef7669d628b646f"
@@ -226,8 +215,6 @@ Mappings:
       RHELHA91HVM: "ami-049340ce5c8942268"
       RHELHA92HVM: "ami-0990b0a747730fea3"
     "af-south-1":
-      RHELHA84HVM: "ami-0828c495d081a6cb7"
-      RHELHA85HVM: "ami-098f194204f364ac8"
       RHELHA86HVM: "ami-0f8fc90496d4970b8"
       RHELHA87HVM: "ami-0a10725be8e755aeb"
       RHELHA88HVM: "ami-06cef80059b5663c0"
@@ -235,8 +222,6 @@ Mappings:
       RHELHA91HVM: "ami-017e2978f5f3d9b04"
       RHELHA92HVM: "ami-0520f659e63241c65"
     "ap-east-1":
-      RHELHA84HVM: "ami-036dd77000cc7df51"
-      RHELHA85HVM: "ami-007a4c80bb2d4d74d"
       RHELHA86HVM: "ami-035f582573bf5877e"
       RHELHA87HVM: "ami-0b69f3ff511f9d0f6"
       RHELHA88HVM: "ami-0bb1f57f0e045461b"
@@ -244,8 +229,6 @@ Mappings:
       RHELHA91HVM: "ami-08e05e87c9d957572"
       RHELHA92HVM: "ami-06778dfc839154edd"
     "ap-south-2":
-      RHELHA84HVM: "ami-0d1ecb90fcfd14452"
-      RHELHA85HVM: "ami-016d51f7a846771d1"
       RHELHA86HVM: "ami-0e0349b9b57372a4d"
       RHELHA87HVM: "ami-09ff0519936c83836"
       RHELHA88HVM: "ami-092056bf18b946454"
@@ -253,8 +236,6 @@ Mappings:
       RHELHA91HVM: "ami-02f61d563e8e3b0e9"
       RHELHA92HVM: "ami-06668f2c68258ab61"
     "ap-southeast-3":
-      RHELHA84HVM: "ami-04147d527e3ff9753"
-      RHELHA85HVM: "ami-0d8278be8d412d6a0"
       RHELHA86HVM: "ami-08cc4a56222fd0b3d"
       RHELHA87HVM: "ami-0a0864eb978c2d9a6"
       RHELHA88HVM: "ami-0b56f7fcd88f262c2"
@@ -262,8 +243,6 @@ Mappings:
       RHELHA91HVM: "ami-0e19e798350aba525"
       RHELHA92HVM: "ami-04b228f4b6daff6b7"
     "ap-southeast-4":
-      RHELHA84HVM: "ami-01480ea5e912b0fb7"
-      RHELHA85HVM: "ami-09df482c3988c13ed"
       RHELHA86HVM: "ami-074b00b5d7c0673ec"
       RHELHA87HVM: "ami-0d75df347f957ef05"
       RHELHA88HVM: "ami-0221a0d28ed3b7235"
@@ -271,8 +250,6 @@ Mappings:
       RHELHA91HVM: "ami-0ae7b9f4aeb5dc3db"
       RHELHA92HVM: "ami-0c327a414b4e7ae9f"
     "ap-south-1":
-      RHELHA84HVM: "ami-04b0a282711c08120"
-      RHELHA85HVM: "ami-0a56512bddec7a2f9"
       RHELHA86HVM: "ami-0f9d278ace56d0b19"
       RHELHA87HVM: "ami-03a9ee30359cf4bc8"
       RHELHA88HVM: "ami-0936dc60a13fc6006"
@@ -280,8 +257,6 @@ Mappings:
       RHELHA91HVM: "ami-0ceed8aa68032d786"
       RHELHA92HVM: "ami-0125034387f25f530"
     "ap-northeast-3":
-      RHELHA84HVM: "ami-0edeb6cb561bba552"
-      RHELHA85HVM: "ami-0f32e039b0c257e3f"
       RHELHA86HVM: "ami-0261a5083740f9c6d"
       RHELHA87HVM: "ami-0dac0d480260d49ea"
       RHELHA88HVM: "ami-0a6ab462aa150e37f"
@@ -289,8 +264,6 @@ Mappings:
       RHELHA91HVM: "ami-0fb8ef2bab4d0f25f"
       RHELHA92HVM: "ami-0dd09774ab7b0fc01"
     "ap-northeast-2":
-      RHELHA84HVM: "ami-06fc9949c7e49967a"
-      RHELHA85HVM: "ami-063adf14c4d7dce7b"
       RHELHA86HVM: "ami-023414b233fb79cfa"
       RHELHA87HVM: "ami-0f7e6b829c9ae3cbf"
       RHELHA88HVM: "ami-0e4aaa29f895cfa19"
@@ -298,8 +271,6 @@ Mappings:
       RHELHA91HVM: "ami-0d97a779db5c3a765"
       RHELHA92HVM: "ami-06f62b9665b531042"
     "ap-southeast-1":
-      RHELHA84HVM: "ami-07f3401d5fbe0fe1a"
-      RHELHA85HVM: "ami-0397bb5f9e44055cf"
       RHELHA86HVM: "ami-0b2b7d0ec00bc1f04"
       RHELHA87HVM: "ami-0fec7f284a6c8f885"
       RHELHA88HVM: "ami-085435f7aac0634a8"
@@ -307,8 +278,6 @@ Mappings:
       RHELHA91HVM: "ami-09220bc6585571378"
       RHELHA92HVM: "ami-001b1f151fbd9806d"
     "ap-southeast-2":
-      RHELHA84HVM: "ami-021719c33f0b1451d"
-      RHELHA85HVM: "ami-09926386e8be72e5d"
       RHELHA86HVM: "ami-0f4030bf747d59345"
       RHELHA87HVM: "ami-0a2c2699752f4bb02"
       RHELHA88HVM: "ami-06041d957b46a4555"
@@ -316,8 +285,6 @@ Mappings:
       RHELHA91HVM: "ami-0ad753ecaec382cf6"
       RHELHA92HVM: "ami-026f18b45ff612222"
     "ap-northeast-1":
-      RHELHA84HVM: "ami-006f28e2c3645caa4"
-      RHELHA85HVM: "ami-07d7e7a2dcb4343c5"
       RHELHA86HVM: "ami-0347f46bc0ff51259"
       RHELHA87HVM: "ami-037363e0794e85af0"
       RHELHA88HVM: "ami-0ef1a8873958b3312"
@@ -325,8 +292,6 @@ Mappings:
       RHELHA91HVM: "ami-0f555304fa64a5762"
       RHELHA92HVM: "ami-0dd3399e16f4dc24e"
     "ca-central-1":
-      RHELHA84HVM: "ami-0c767e2bd5e6739cb"
-      RHELHA85HVM: "ami-07d943261d6b8b76d"
       RHELHA86HVM: "ami-014a1bfbde981b3c2"
       RHELHA87HVM: "ami-03f59df645b6ce5c5"
       RHELHA88HVM: "ami-0353f0ea08c9c01cf"
@@ -334,8 +299,6 @@ Mappings:
       RHELHA91HVM: "ami-0149d341ad9957d39"
       RHELHA92HVM: "ami-03467364e223a95ae"
     "eu-central-1":
-      RHELHA84HVM: "ami-0bf247a7f4a045c7a"
-      RHELHA85HVM: "ami-0dc0b575740049fdc"
       RHELHA86HVM: "ami-02e624650a8f7f6ee"
       RHELHA87HVM: "ami-02da1af10c90eaa04"
       RHELHA88HVM: "ami-09bd54779f97aa2e1"
@@ -343,8 +306,6 @@ Mappings:
       RHELHA91HVM: "ami-087a3abf6f4f4625c"
       RHELHA92HVM: "ami-0da09574793dfada7"
     "eu-west-1":
-      RHELHA84HVM: "ami-02047739925a15f3e"
-      RHELHA85HVM: "ami-026782d359c70fa85"
       RHELHA86HVM: "ami-00bf77eb51a5ea903"
       RHELHA87HVM: "ami-028672500b94cb531"
       RHELHA88HVM: "ami-0b4c02c04b2cc0b20"
@@ -352,8 +313,6 @@ Mappings:
       RHELHA91HVM: "ami-054b35f3f241e5acc"
       RHELHA92HVM: "ami-0212f613623e800d0"
     "eu-west-2":
-      RHELHA84HVM: "ami-01f69507ab2cf7d3f"
-      RHELHA85HVM: "ami-050be23726f2b7324"
       RHELHA86HVM: "ami-06be95d00d9965f43"
       RHELHA87HVM: "ami-015efc604a6ae0078"
       RHELHA88HVM: "ami-08825379d82045a56"
@@ -361,8 +320,6 @@ Mappings:
       RHELHA91HVM: "ami-05e0096c5124b6490"
       RHELHA92HVM: "ami-0be99727a9f5d77e8"
     "eu-south-1":
-      RHELHA84HVM: "ami-07768fbd5fd7f07c4"
-      RHELHA85HVM: "ami-0ba3d9c58a783a4e7"
       RHELHA86HVM: "ami-0242fd7925e40a70a"
       RHELHA87HVM: "ami-0a9842840ba3e9363"
       RHELHA88HVM: "ami-0812ef84d7e4f593e"
@@ -370,8 +327,6 @@ Mappings:
       RHELHA91HVM: "ami-0d171a386e57ac9fe"
       RHELHA92HVM: "ami-0a13115dbd189ab1a"
     "eu-west-3":
-      RHELHA84HVM: "ami-0fd5072606e959cfe"
-      RHELHA85HVM: "ami-0414c350ed4f0e3c9"
       RHELHA86HVM: "ami-0fb0bac4ae236fda7"
       RHELHA87HVM: "ami-0ac5164c51cd393bc"
       RHELHA88HVM: "ami-081d2bb49029ad39d"
@@ -379,8 +334,6 @@ Mappings:
       RHELHA91HVM: "ami-045e4f0a801840daf"
       RHELHA92HVM: "ami-0dbfca1951c4d4f54"
     "eu-south-2":
-      RHELHA84HVM: "ami-0a27cb75242e81600"
-      RHELHA85HVM: "ami-0d0962202cbd48a17"
       RHELHA86HVM: "ami-070f84deef6c5530d"
       RHELHA87HVM: "ami-06171e34781f8dffc"
       RHELHA88HVM: "ami-0d0f2370e292cd06f"
@@ -388,8 +341,6 @@ Mappings:
       RHELHA91HVM: "ami-036faaeb08f436e48"
       RHELHA92HVM: "ami-0d835b01edf07bff0"
     "eu-north-1":
-      RHELHA84HVM: "ami-0cfb98b45c6403d81"
-      RHELHA85HVM: "ami-066e496945db4254f"
       RHELHA86HVM: "ami-022d38fa78f822277"
       RHELHA87HVM: "ami-0e052b800f9990724"
       RHELHA88HVM: "ami-0541c4d37182fa0ec"
@@ -397,8 +348,6 @@ Mappings:
       RHELHA91HVM: "ami-0f23f66f6e836c9e0"
       RHELHA92HVM: "ami-0c09d1b852ebcf02a"
     "eu-central-2":
-      RHELHA84HVM: "ami-095f44ab12e1eb27f"
-      RHELHA85HVM: "ami-0ff92c9d30d08ea80"
       RHELHA86HVM: "ami-0d15eec683278840d"
       RHELHA87HVM: "ami-04cd1d8ea4e42cdbb"
       RHELHA88HVM: "ami-019d04c0158876bcc"
@@ -406,8 +355,6 @@ Mappings:
       RHELHA91HVM: "ami-0ad6de85a8b717c26"
       RHELHA92HVM: "ami-0760cf87a17fe799b"
     "me-south-1":
-      RHELHA84HVM: "ami-0420533e68a3cfcc2"
-      RHELHA85HVM: "ami-0db5a50861570d9d9"
       RHELHA86HVM: "ami-0195aa893674b239e"
       RHELHA87HVM: "ami-06a8eab76969a2e35"
       RHELHA88HVM: "ami-0824d5bc90d7b7439"
@@ -415,8 +362,6 @@ Mappings:
       RHELHA91HVM: "ami-08371f099a68d7db1"
       RHELHA92HVM: "ami-0f52fb797dde47592"
     "me-central-1":
-      RHELHA84HVM: "ami-0c67d7f541fcc08ba"
-      RHELHA85HVM: "ami-0fcfbf0078aea872b"
       RHELHA86HVM: "ami-0d4014836a983ffcf"
       RHELHA87HVM: "ami-0e9648741d23a3f91"
       RHELHA88HVM: "ami-006a1fedc0f447490"
@@ -424,8 +369,6 @@ Mappings:
       RHELHA91HVM: "ami-088c0ae9b55441ff0"
       RHELHA92HVM: "ami-0503d842d8321fa61"
     "il-central-1":
-      RHELHA84HVM: ""
-      RHELHA85HVM: "ami-01ee2ab26829f788c"
       RHELHA86HVM: "ami-0d6e4e93884db4161"
       RHELHA87HVM: "ami-08696693c7aef53ce"
       RHELHA88HVM: "ami-0e6705a4ac4bc31bf"
@@ -433,8 +376,6 @@ Mappings:
       RHELHA91HVM: "ami-0180664ef9cc34f7b"
       RHELHA92HVM: "ami-04e8a133ebedb4585"
     "sa-east-1":
-      RHELHA84HVM: "ami-02fe67cb83fb40e8c"
-      RHELHA85HVM: "ami-0e61d21ff3f21fff0"
       RHELHA86HVM: "ami-0218cb0718377daf7"
       RHELHA87HVM: "ami-0fbccb1e5edbfb522"
       RHELHA88HVM: "ami-00763bbaacce9c919"
