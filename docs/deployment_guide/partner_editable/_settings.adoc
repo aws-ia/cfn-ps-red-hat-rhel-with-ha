@@ -3,9 +3,9 @@
 :partner-product-name: Red Hat Enterprise Linux with High Availability
 :partner-product-short-name: RHEL with HA
 :partner-company-name: Red Hat
-:doc-month: May
+:doc-month: September
 :doc-year: 2023
-:aws-contributors: David Duncan, Enterprise Linux team
+:aws-contributors: David Duncan and Dominik Wombacher, AWS Enterprise Linux team
 :aws-ia-contributors: Dave May, AWS Integration & Automation team
 :deployment_time: 15 minutes
 :default_deployment_region: us-east-1

@@ -2,7 +2,6 @@
 
 This Partner Solution provides the following deployment options:
 
-* http://qs_launch_permalink[Deploy RHEL with HA APN into a new VPC^]. This option builds a new AWS environment that consists of the VPC, subnets, NAT gateways, security groups, bastion hosts, and other infrastructure components. It then deploys RHEL with HA APN into this new VPC.
-* http://qs_launch_permalink[Deploy RHEL with HA APN into an existing VPC^]. This option provisions RHEL with HA APN in your existing AWS infrastructure.
+* http://RDrm5?[Deploy RHEL with HA APN into a new VPC^]. This option builds a new AWS environment that consists of the VPC, subnets, NAT gateways, security groups, bastion hosts, and other infrastructure components. It then deploys RHEL with HA APN into this new VPC.
 
 This Partner Solution provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and RHEL with HA APN settings.
