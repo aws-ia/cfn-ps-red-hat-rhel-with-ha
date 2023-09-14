@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template sets up RHEL with HA in Extra Node 2 of the cluster. (qs-1s4ofsifo)
+Description: Deploy and configure RHEL with HA cluster node. (qs-1s2mh2abe)
 Metadata:
   cfn-lint:
     config:
@@ -81,6 +81,14 @@ Parameters:
     Type: String
   WaitHandle:
     Type: String
+  NodeIdentifier:
+    Description: Which cluster node will be deployed
+    ConstraintDescription: Must be node1, node2 or node3 and only used once per cluster
+    Type: String
+    AllowedValues:
+      - node1
+      - node2
+      - node3
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
@@ -134,7 +142,7 @@ Resources:
         hostname:
           commands:
             execute:
-              command: !Sub "sudo python3 upload_hostname.py ${BucketName} node3 ${AWS::Region}"
+              command: !Sub "sudo python3 upload_hostname.py ${BucketName} ${NodeIdentifier} ${AWS::Region}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -160,3 +168,4 @@ Outputs:
   InstanceId:
     Description: Instance ID of the EC2 Instance
     Value: !Ref RHELwithHAInstance
+

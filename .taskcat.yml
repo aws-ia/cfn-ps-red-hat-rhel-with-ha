@@ -4,6 +4,7 @@ project:
   name: cfn-ps-red-hat-rhel-with-ha
   regions:
     - us-east-1
+  s3_regional_buckets: true
 tests:
   default:
     template: ./templates/main.template.yaml
