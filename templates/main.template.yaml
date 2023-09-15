@@ -418,7 +418,7 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix:
-          Fn::Sub: ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
+          Fn::Sub: ${QSS3KeyPrefix}submodules/cfn-ps-linux-bastion/
   WaitHandle:
     Type: 'AWS::CloudFormation::WaitConditionHandle'
   WaitCondition:
