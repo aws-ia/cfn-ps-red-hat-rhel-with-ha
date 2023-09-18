@@ -135,7 +135,7 @@ Resources:
         hostname:
           commands:
             execute:
-              command: !Sub "sudo python3 upload_hostname.py ${BucketName} ${NodeIdentifier} ${AWS::Region}"
+              command: !Sub "sudo python3 /upload_hostname.py ${BucketName} ${NodeIdentifier} ${AWS::Region}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -144,19 +144,22 @@ Resources:
       ImageId: !Ref ImageId
       SecurityGroupIds:
         - !Ref SecurityGroupId
-      UserData: !Base64 
-        Fn::Sub:
-          - |
-            #cloud-config
-            runcmd:
-              - ['sudo', 'dnf', '-y', 'install', 'wget', 'python3', 'python3-setuptools', 'python3-docutils', 'awscli']
-              - ['sudo', 'wget', "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz", -O, "/tmp/aws-cfn-bootstrap-py3-latest.tar.gz" ]
-              - ['sudo', 'easy_install-3', '--script-dir', '/usr/local/bin', '/tmp/aws-cfn-bootstrap-py3-latest.tar.gz']
-              - ['sudo', '/usr/local/bin/cfn-init', '-v', '--stack', ${STACKNAME}, '--resource', 'RHELwithHAInstance', '--configsets', 'setup', '--region', ${REGION} ]
-              - ['sudo', '/usr/local/bin/cfn-signal', '${WAIT_HANDLE}']
-          - { STACKNAME: !Ref 'AWS::StackName', REGION: !Ref 'AWS::Region', WAIT_HANDLE: !Ref 'WaitHandle' }
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+
+          rhel_ver=$(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print $2}' /etc/os-release)
+          echo "RHEL Version: $rhel_ver"
+
+          if [[ $rhel_ver == "8."* ]]; then
+            sudo dnf -y install wget python3 python3-setuptools python3-docutils awscli
+            sudo wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz -O /tmp/aws-cfn-bootstrap-py3-latest.tar.gz
+            sudo easy_install-3 --script-dir /usr/local/bin /tmp/aws-cfn-bootstrap-py3-latest.tar.gz
+          fi
+
+          sudo /usr/local/bin/cfn-init -v --stack "${AWS::StackName}" --resource "RHELwithHAInstance" --configsets setup --region "${AWS::Region}"
+          sudo /usr/local/bin/cfn-signal -e $? "${WaitHandle}"
 Outputs:
   InstanceId:
     Description: Instance ID of the EC2 Instance
     Value: !Ref RHELwithHAInstance
-
