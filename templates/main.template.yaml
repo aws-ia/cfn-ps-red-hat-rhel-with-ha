@@ -554,11 +554,11 @@ Resources:
                   - ec2:DeleteRoute
                   - ec2:CreateRoute
                 Resource:
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePublicSubnet]
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet1]
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet2]
-                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet3], !Ref AWS::NoValue]
-                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet4], !Ref AWS::NoValue]
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable]
+                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
+                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
 
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
@@ -616,11 +616,11 @@ Resources:
         FloatingIPAddress: !Ref FloatingIPAddress
         RouteTableId: !Join
           - ','
-          - - !Ref OverlayIPRoutePublicSubnet
-            - !Ref OverlayIPRoutePrivateSubnet1
-            - !Ref OverlayIPRoutePrivateSubnet2
-            - !If [ThreeOrFour, !Ref OverlayIPRoutePrivateSubnet3, None]
-            - !If [Four, !Ref OverlayIPRoutePrivateSubnet4, None]
+          - - !GetAtt VPCStack.Outputs.PublicSubnetRouteTable
+            - !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable
+            - !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
+            - !If [ThreeOrFour, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref AWS::NoValue]
+            - !If [Four, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref AWS::NoValue]
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
