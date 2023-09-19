@@ -462,33 +462,6 @@ Resources:
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
 
-  NATGatewayRoutePrivateSubnet1:
-    Type: AWS::EC2::Route
-    Properties:
-       RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable
-       DestinationCidrBlock: 0.0.0.0/0
-       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway1ID   
-  NATGatewayRoutePrivateSubnet2:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway2ID
-  NATGatewayRoutePrivateSubnet3:
-    Type: AWS::EC2::Route
-    Condition: ThreeOrFour
-    Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway3ID
-  NATGatewayRoutePrivateSubnet4:
-    Type: AWS::EC2::Route
-    Condition: Four
-    Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway4ID
-
   ClusterSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -584,8 +557,8 @@ Resources:
                   - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePublicSubnet]
                   - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet1]
                   - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet2]
-                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet3], None]
-                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet4], None]
+                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet3], !Ref AWS::NoValue]
+                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet4], !Ref AWS::NoValue]
 
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
