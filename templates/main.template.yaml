@@ -573,87 +573,40 @@ Resources:
       Handle: !Ref WaitHandle
       Count: !If [Four, 3, !If [Three, 2, 1]]
       Timeout: '3600'
-  HARouteTable:
-    Type: 'AWS::EC2::RouteTable'
-    Properties:
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-  HARoute:
+
+  OverlayIPRoutePrivateSubnet1:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId:
-        Ref: HARouteTable
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
-  NATRouteTable1:
-    Type: 'AWS::EC2::RouteTable'
-    Properties:
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-  NATRouteTableAssociation1:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-      RouteTableId: !Ref NATRouteTable1
-  NATRoute1:
+  OverlayIPRoutePrivateSubnet2:
     Type: AWS::EC2::Route
     Properties:
-       RouteTableId:
-         Ref: NATRouteTable1
-       DestinationCidrBlock: 0.0.0.0/0
-       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway1ID   
-  NATRouteTable2:
-    Type: 'AWS::EC2::RouteTable'
-    Properties:
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-  NATRouteTableAssociation2:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-      RouteTableId: !Ref NATRouteTable2
-  NATRoute2:
-    Type: AWS::EC2::Route
-    Properties:
-       RouteTableId:
-         Ref: NATRouteTable2
-       DestinationCidrBlock: 0.0.0.0/0
-       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway2ID   
-  NATRouteTable3:
-    Type: 'AWS::EC2::RouteTable'
-    Condition: ThreeOrFour
-    Properties:
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-  NATRouteTableAssociation3:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Condition: ThreeOrFour
-    Properties:
-      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
-      RouteTableId: !Ref NATRouteTable3
-  NATRoute3:
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  OverlayIPRoutePrivateSubnet3:
     Type: AWS::EC2::Route
     Condition: ThreeOrFour
     Properties:
-       RouteTableId:
-         Ref: NATRouteTable3
-       DestinationCidrBlock: 0.0.0.0/0
-       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway3ID   
-  NATRouteTable4:
-    Type: 'AWS::EC2::RouteTable'
-    Condition: Four
-    Properties:
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-  NATRouteTableAssociation4:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Condition: Four
-    Properties:
-      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
-      RouteTableId: !Ref NATRouteTable4
-  NATRoute4:
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  OverlayIPRoutePrivateSubnet4:
     Type: AWS::EC2::Route
     Condition: Four
     Properties:
-       RouteTableId:
-         Ref: NATRouteTable4
-       DestinationCidrBlock: 0.0.0.0/0
-       NatGatewayId: !GetAtt VPCStack.Outputs.NATGateway4ID   
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  OverlayIPRoutePublicSubnet:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+
   ClusterSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -730,8 +683,14 @@ Resources:
                   - ec2:UnassignPrivateIpAddresses
                   - ec2:ModifyInstanceAttribute
                 Resource: "*"
-        - PolicyName: routetable
-          PolicyDocument:
+
+  PolicyRouteTable:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref ClusterRole
+      PolicyName: routetable
+      PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
@@ -740,9 +699,12 @@ Resources:
                   - ec2:DeleteRoute
                   - ec2:CreateRoute
                 Resource:
-                  !Sub 
-                    - "arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}"
-                    - RouteTableID: !Ref HARouteTable
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable]
+                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
+                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
+
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
@@ -797,7 +759,13 @@ Resources:
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
         FloatingIPAddress: !Ref FloatingIPAddress
-        RouteTableId: !Ref HARouteTable
+        RouteTableId: !Join
+          - ','
+          - - !GetAtt VPCStack.Outputs.PublicSubnetRouteTable
+            - !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable
+            - !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
+            - !If [ThreeOrFour, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref AWS::NoValue]
+            - !If [Four, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref AWS::NoValue]
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix

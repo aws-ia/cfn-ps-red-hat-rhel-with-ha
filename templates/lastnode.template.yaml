@@ -301,6 +301,7 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ClusterProfile
       SubnetId: !Ref SubnetId
+      SourceDestCheck: false
       ImageId: !Ref ImageId
       SecurityGroupIds:
         - !Ref SecurityGroupId
