@@ -428,17 +428,40 @@ Resources:
       Handle: !Ref WaitHandle
       Count: !If [Four, 3, !If [Three, 2, 1]]
       Timeout: '3600'
-  HARouteTable:
-    Type: 'AWS::EC2::RouteTable'
-    Properties:
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-  HARoute:
+
+  OverlayIPRoutePrivateSubnet1:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId:
-        Ref: HARouteTable
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  OverlayIPRoutePrivateSubnet2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  OverlayIPRoutePrivateSubnet3:
+    Type: AWS::EC2::Route
+    Condition: ThreeOrFour
+    Properties:
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  OverlayIPRoutePrivateSubnet4:
+    Type: AWS::EC2::Route
+    Condition: Four
+    Properties:
+      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+  OverlayIPRoutePublicSubnet:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable
+      DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
+      InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
+
   NATRouteTable1:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -585,8 +608,14 @@ Resources:
                   - ec2:UnassignPrivateIpAddresses
                   - ec2:ModifyInstanceAttribute
                 Resource: "*"
-        - PolicyName: routetable
-          PolicyDocument:
+
+  PolicyRouteTable:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref ClusterRole
+      PolicyName: routetable
+      PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
@@ -595,9 +624,12 @@ Resources:
                   - ec2:DeleteRoute
                   - ec2:CreateRoute
                 Resource:
-                  !Sub 
-                    - "arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}"
-                    - RouteTableID: !Ref HARouteTable
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePublicSubnet]
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet1]
+                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet2]
+                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet3], None]
+                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !Ref OverlayIPRoutePrivateSubnet4], None]
+
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
@@ -652,7 +684,13 @@ Resources:
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
         FloatingIPAddress: !Ref FloatingIPAddress
-        RouteTableId: !Ref HARouteTable
+        RouteTableId: !Join
+          - ','
+          - - !Ref OverlayIPRoutePublicSubnet
+            - !Ref OverlayIPRoutePrivateSubnet1
+            - !Ref OverlayIPRoutePrivateSubnet2
+            - !If [ThreeOrFour, !Ref OverlayIPRoutePrivateSubnet3, None]
+            - !If [Four, !Ref OverlayIPRoutePrivateSubnet4, None]
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
