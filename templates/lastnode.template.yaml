@@ -301,7 +301,6 @@ Resources:
             rm -rf /tmp/aws
             sudo wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz -O /tmp/aws-cfn-bootstrap-py3-latest.tar.gz
             sudo pip3 install /tmp/aws-cfn-bootstrap-py3-latest.tar.gz
-            sudo pip3 install boto3
           fi
 
           sudo aws configure set default.region "${AWS::Region}"

@@ -722,9 +722,6 @@ Resources:
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         WaitHandle: !Ref WaitHandle
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -757,12 +754,6 @@ Resources:
             - !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
             - !If [ThreeOrFour, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref AWS::NoValue]
             - !If [Four, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref AWS::NoValue]
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        Node1InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
-        Node2InstanceId: !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.InstanceId, None]
-        Node3InstanceId: !If [Four, !GetAtt ExtraNode2Stack.Outputs.InstanceId, None]
         NodeHostnames: !Join
           - ' '
           - - !GetAtt FirstNodeStack.Outputs.PrivateDnsName
@@ -792,9 +783,6 @@ Resources:
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         WaitHandle: !Ref WaitHandle
   ExtraNode2Stack:
     Type: 'AWS::CloudFormation::Stack'
@@ -815,7 +803,4 @@ Resources:
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         WaitHandle: !Ref WaitHandle
