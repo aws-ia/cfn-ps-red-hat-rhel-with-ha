@@ -772,6 +772,16 @@ Resources:
         Node1InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
         Node2InstanceId: !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.InstanceId, None]
         Node3InstanceId: !If [Four, !GetAtt ExtraNode2Stack.Outputs.InstanceId, None]
+        NodeHostnames: !Join
+          - ' '
+          - - !GetAtt FirstNodeStack.Outputs.PrivateDnsName
+            - !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !Ref AWS::NoValue]
+            - !If [Four, !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !Ref AWS::NoValue]
+        ClusterHostMap: !Join
+          - ';'
+          - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
+            - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
+            - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
   ExtraNode1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: ThreeOrFour

@@ -250,7 +250,6 @@ Resources:
             - 'install'
             - 'setup'
             - 'service'
-            - 'hostname'
         install:
           packages: 
             yum: 
@@ -314,9 +313,13 @@ Resources:
             sudo pip3 install boto3
           fi
 
+          sudo aws configure set default.region "${AWS::Region}"
           sudo /usr/local/bin/cfn-init -v --stack "${AWS::StackName}" --resource "RHELwithHAInstance" --configsets setup --region "${AWS::Region}"
           sudo /usr/local/bin/cfn-signal -e $? "${WaitHandle}"
 Outputs:
   InstanceId:
     Description: Instance ID of the EC2 Instance
     Value: !Ref RHELwithHAInstance
+  PrivateDnsName:
+    Description: PrivateDnsName of the EC2 Instance
+    Value: !GetAtt RHELwithHAInstance.PrivateDnsName

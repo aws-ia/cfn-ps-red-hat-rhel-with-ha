@@ -242,6 +242,12 @@ Parameters:
   Node3InstanceId:
     Description: Instance ID of the third RHEL instance, if exists
     Type: String
+  NodeHostnames:
+    Description: Comma separated list of the hostnames of all other nodes in the cluster
+    Type: String
+  ClusterHostMap:
+    Description: Semicolon separated list of all other cluster nodes in the format <hostname>:<instance_id>
+    Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
@@ -258,7 +264,7 @@ Resources:
             - 'install'
             - 'setup'
             - 'service'
-            - 'hostname'
+            - 'cluster'
         install:
           packages: 
             yum: 
@@ -283,7 +289,7 @@ Resources:
               authentication: S3AccessCreds
           commands:
             setpassword:
-              command: "echo \"hacluster:$CLUSTERPASSWORD\" | sudo chpasswd" 
+              command: "echo \"hacluster:$CLUSTERPASSWORD\" | sudo chpasswd"
               env:
                 CLUSTERPASSWORD: !Ref ClusterPassword
         service:
@@ -292,6 +298,24 @@ Resources:
               command: "sudo systemctl start pcsd.service"
             b_enableservice:
               command: "sudo systemctl enable pcsd.service"
+        cluster:
+          commands:
+            execute:
+              command: !Sub |
+                TOKEN=`curl -s -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
+                EC2INSTANCEID=`curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id`
+                EC2HOSTNAME=`curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/hostname`
+                echo "Instance ID: $EC2INSTANCEID"
+                echo "Instance Hostname: $EC2HOSTNAME"
+
+                sudo pcs host auth ${NodeHostnames} $EC2HOSTNAME -u hacluster -p ${ClusterPassword}
+                sudo pcs cluster setup newcluster ${NodeHostnames} $EC2HOSTNAME --force
+                sudo pcs cluster start --all --wait
+                sudo pcs stonith create clusterfence fence_aws region=${AWS::Region} pcmk_host_map="${ClusterHostMap};$EC2HOSTNAME:$EC2INSTANCEID" power_timeout=240 pcmk_reboot_timeout=480 pcmk_reboot_retries=4 --force
+                sudo pcs resource create ha_listener ocf:heartbeat:aws-vpc-move-ip ip=${FloatingIPAddress} interface="eth0" routing_table=${RouteTableId} op monitor timeout="30s" interval="60s"
+                sudo pcs property set stonith-enabled=true
+                sudo pcs property set start-failure-is-fatal=true
+                sudo pcs property set cluster-recheck-interval=75s
         hostname:
           commands:
             execute:
@@ -329,4 +353,5 @@ Resources:
             sudo pip3 install boto3
           fi
 
+          sudo aws configure set default.region "${AWS::Region}"
           sudo /usr/local/bin/cfn-init -v --stack "${AWS::StackName}" --resource "RHELwithHAInstance" --configsets setup --region "${AWS::Region}"
