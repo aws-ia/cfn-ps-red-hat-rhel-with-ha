@@ -199,9 +199,6 @@ Parameters:
     Description: Password used for the user HACluster in the RHEL HA setup
     Type: String
     NoEcho: true
-  BucketName:
-    Description: Name of bucket that will contain the hostnames
-    Type: String
   ClusterRole:
     Description: IAM Role for access to the S3 Buckets
     Type: String
@@ -217,39 +214,12 @@ Parameters:
   RouteTableId:
     Description: ID of the route table that manages fencing
     Type: String
-  QSS3BucketName:
-    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
-    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Default: aws-quickstart
-    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Type: String
-  QSS3BucketRegion:
-    Default: 'us-east-1'
-    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
-    Type: String
-  QSS3KeyPrefix:
-    AllowedPattern: "^[0-9a-zA-Z-/]*$"
-    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Default: implementing/
-    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Type: String
-  Node1InstanceId:
-    Description: Instance ID of first RHEL instance, if exists
-    Type: String
-  Node2InstanceId:
-    Description: Instance ID of the second RHEL instance, if exists
-    Type: String
-  Node3InstanceId:
-    Description: Instance ID of the third RHEL instance, if exists
-    Type: String
   NodeHostnames:
     Description: Comma separated list of the hostnames of all other nodes in the cluster
     Type: String
   ClusterHostMap:
     Description: Semicolon separated list of all other cluster nodes in the format <hostname>:<instance_id>
     Type: String
-Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -272,21 +242,6 @@ Resources:
               pacemaker: []
               fence-agents-aws: []
         setup:
-          files:
-            "/upload_hostname.py":
-              source:
-                !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/upload_hostname.py
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-              authentication: S3AccessCreds
-            "/get_hostnames.py":
-              source:
-                !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/get_hostnames.py
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-              authentication: S3AccessCreds
           commands:
             setpassword:
               command: "echo \"hacluster:$CLUSTERPASSWORD\" | sudo chpasswd"
@@ -316,10 +271,6 @@ Resources:
                 sudo pcs property set stonith-enabled=true
                 sudo pcs property set start-failure-is-fatal=true
                 sudo pcs property set cluster-recheck-interval=75s
-        hostname:
-          commands:
-            execute:
-              command: !Sub "sudo python3 /get_hostnames.py ${BucketName} ${ClusterPassword} ${AWS::Region} ${FloatingIPAddress} ${RouteTableId} ${Node1InstanceId} ${Node2InstanceId} ${Node3InstanceId}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
