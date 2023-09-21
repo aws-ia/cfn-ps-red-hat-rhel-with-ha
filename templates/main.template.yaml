@@ -707,11 +707,11 @@ Resources:
                   - ec2:DeleteRoute
                   - ec2:CreateRoute
                 Resource:
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable]
-                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
-                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable]
+                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
+                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
 
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
