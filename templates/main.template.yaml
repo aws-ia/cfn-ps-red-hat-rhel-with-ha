@@ -758,7 +758,7 @@ Resources:
           - ' '
           - - !GetAtt FirstNodeStack.Outputs.PrivateDnsName
             - !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !Ref AWS::NoValue]
-            - !If [Four, !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !Ref AWS::NoValue]
+            - !If [Four, !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !Ref AWS::NoValue]
         ClusterHostMap: !Join
           - ';'
           - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
