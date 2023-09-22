@@ -215,7 +215,7 @@ Parameters:
     Description: ID of the route table that manages fencing
     Type: String
   NodeHostnames:
-    Description: Comma separated list of the hostnames of all other nodes in the cluster
+    Description: Whitespace separated list of the hostnames of all other nodes in the cluster
     Type: String
   ClusterHostMap:
     Description: Semicolon separated list of all other cluster nodes in the format <hostname>:<instance_id>
