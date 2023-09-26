@@ -5,16 +5,65 @@ project:
   regions:
     - us-east-1
   s3_regional_buckets: true
+  parameters:
+    KeyPairName: "$[taskcat_getkeypair]"
+    QSS3KeyPrefix: "cfn-ps-red-hat-rhel-with-ha/"
+    QSS3BucketName: '$[taskcat_autobucket]'
+    QSS3BucketRegion: "$[taskcat_current_region]"
+    ClusterPassword: "$[taskcat_genpass_8A]"
+    RemoteAccessCIDR: "0.0.0.0/0"
 tests:
   default:
     template: ./templates/main.template.yaml
     parameters:
       NodeOS: "RHELHA88HVM"
-      KeyPairName: "$[taskcat_getkeypair]"
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
-      QSS3KeyPrefix: "cfn-ps-red-hat-rhel-with-ha/"
-      QSS3BucketName: '$[taskcat_autobucket]'
-      QSS3BucketRegion: "$[taskcat_current_region]"
-      ClusterPassword: "$[taskcat_genpass_8A]"
-      RemoteAccessCIDR: "0.0.0.0/0"
+  rhel8az2:
+    template: ./templates/main.template.yaml
+    parameters:
+      NodeOS: "RHELHA88HVM"
+      AvailabilityZones: "$[taskcat_getaz_2]"
+      NumberOfAZs: "2"
+    regions:
+      - us-west-1
+  rhel9az2:
+    template: ./templates/main.template.yaml
+    parameters:
+      NodeOS: "RHELHA92HVM"
+      AvailabilityZones: "$[taskcat_getaz_2]"
+      NumberOfAZs: "2"
+    regions:
+      - us-west-1
+  rhel8az3:
+    template: ./templates/main.template.yaml
+    parameters:
+      NodeOS: "RHELHA88HVM"
+      AvailabilityZones: "$[taskcat_getaz_3]"
+      NumberOfAZs: "3"
+    regions:
+      - us-east-2
+  rhel9az3:
+    template: ./templates/main.template.yaml
+    parameters:
+      NodeOS: "RHELHA92HVM"
+      AvailabilityZones: "$[taskcat_getaz_3]"
+      NumberOfAZs: "3"
+    regions:
+      - us-east-2
+  rhel8az4:
+    template: ./templates/main.template.yaml
+    parameters:
+      NodeOS: "RHELHA88HVM"
+      AvailabilityZones: "$[taskcat_getaz_4]"
+      NumberOfAZs: "4"
+    regions:
+      - us-west-2
+  rhel9az4:
+    template: ./templates/main.template.yaml
+    parameters:
+      NodeOS: "RHELHA92HVM"
+      AvailabilityZones: "$[taskcat_getaz_4]"
+      NumberOfAZs: "4"
+    regions:
+      - us-west-2
