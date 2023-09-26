@@ -199,43 +199,14 @@ Parameters:
     Description: Password used for the user HACluster in the RHEL HA setup
     Type: String
     NoEcho: true
-  BucketName:
-    Description: Name of bucket that will contain the hostnames
-    Type: String
   ClusterRole:
     Description: IAM Role for access to the S3 Buckets
     Type: String
   ClusterProfile:
     Description: IAM Instance Profile for access to the S3 Buckets
     Type: String
-  QSS3BucketName:
-    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
-    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Default: aws-quickstart
-    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Type: String
-  QSS3BucketRegion:
-    Default: 'us-east-1'
-    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
-    Type: String
-  QSS3KeyPrefix:
-    AllowedPattern: "^[0-9a-zA-Z-/]*$"
-    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Default: implementing/
-    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Type: String
   WaitHandle:
     Type: String
-  NodeIdentifier:
-    Description: Which cluster node will be deployed
-    ConstraintDescription: Must be node1, node2 or node3 and only used once per cluster
-    Type: String
-    AllowedValues:
-      - node1
-      - node2
-      - node3
-Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -250,7 +221,6 @@ Resources:
             - 'install'
             - 'setup'
             - 'service'
-            - 'hostname'
         install:
           packages: 
             yum: 
@@ -258,14 +228,6 @@ Resources:
               pacemaker: []
               fence-agents-aws: []
         setup:
-          files:
-            "/upload_hostname.py":
-              source:
-                !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/upload_hostname.py
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-              authentication: S3AccessCreds
           commands:
             setpassword:
               command: "echo \"hacluster:$CLUSTERPASSWORD\" | sudo chpasswd" 
@@ -277,10 +239,6 @@ Resources:
               command: "sudo systemctl start pcsd.service"
             b_enableservice:
               command: "sudo systemctl enable pcsd.service"
-        hostname:
-          commands:
-            execute:
-              command: !Sub "sudo python3 /upload_hostname.py ${BucketName} ${NodeIdentifier} ${AWS::Region}"
     Properties:
       KeyName: !Ref KeyPairName
       InstanceType: !Ref InstanceType
@@ -311,12 +269,15 @@ Resources:
             rm -rf /tmp/aws
             sudo wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz -O /tmp/aws-cfn-bootstrap-py3-latest.tar.gz
             sudo pip3 install /tmp/aws-cfn-bootstrap-py3-latest.tar.gz
-            sudo pip3 install boto3
           fi
 
+          sudo aws configure set default.region "${AWS::Region}"
           sudo /usr/local/bin/cfn-init -v --stack "${AWS::StackName}" --resource "RHELwithHAInstance" --configsets setup --region "${AWS::Region}"
           sudo /usr/local/bin/cfn-signal -e $? "${WaitHandle}"
 Outputs:
   InstanceId:
     Description: Instance ID of the EC2 Instance
     Value: !Ref RHELwithHAInstance
+  PrivateDnsName:
+    Description: PrivateDnsName of the EC2 Instance
+    Value: !GetAtt RHELwithHAInstance.PrivateDnsName

@@ -615,10 +615,6 @@ Resources:
       SecurityGroupIngress:
         - IpProtocol: '-1'
           CidrIp: !Ref VPCCIDR
-  HostnameBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      AccessControl: Private
   ClusterRole:
     Type: 'AWS::IAM::Role'
     Metadata:
@@ -648,9 +644,7 @@ Resources:
                   - s3:ListBucket
                   - s3:GetObject
                   - s3:PutObject
-                Resource: 
-                  - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}'
-                  - !Sub 'arn:${AWS::Partition}:s3:::${HostnameBucket}/*'
+                Resource:
                   - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]
                   - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]  
         - PolicyName: reboot
@@ -726,14 +720,9 @@ Resources:
         ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
-        BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         WaitHandle: !Ref WaitHandle
-        NodeIdentifier: "node1"
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
     DependsOn: WaitCondition
@@ -755,7 +744,6 @@ Resources:
         ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
-        BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
         FloatingIPAddress: !Ref FloatingIPAddress
@@ -766,12 +754,16 @@ Resources:
             - !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
             - !If [ThreeOrFour, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref AWS::NoValue]
             - !If [Four, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref AWS::NoValue]
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        Node1InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
-        Node2InstanceId: !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.InstanceId, None]
-        Node3InstanceId: !If [Four, !GetAtt ExtraNode2Stack.Outputs.InstanceId, None]
+        NodeHostnames: !Join
+          - ' '
+          - - !GetAtt FirstNodeStack.Outputs.PrivateDnsName
+            - !If [ThreeOrFour, !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !Ref AWS::NoValue]
+            - !If [Four, !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !Ref AWS::NoValue]
+        ClusterHostMap: !Join
+          - ';'
+          - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
+            - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
+            - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
   ExtraNode1Stack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: ThreeOrFour
@@ -789,14 +781,9 @@ Resources:
         ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
-        BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         WaitHandle: !Ref WaitHandle
-        NodeIdentifier: "node2"
   ExtraNode2Stack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: Four
@@ -814,11 +801,6 @@ Resources:
         ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
-        BucketName: !Ref HostnameBucket
         ClusterRole: !Ref ClusterRole
         ClusterProfile: !Ref ClusterInstanceProfile
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         WaitHandle: !Ref WaitHandle
-        NodeIdentifier: "node3"
