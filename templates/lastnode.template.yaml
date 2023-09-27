@@ -195,8 +195,11 @@ Parameters:
     Description: "EC2 instance type. For the best performance, we recommend to use sixth (M, C, R, Hpc) or third (T) generation and later."
     Type: String
   SubnetId:
-    Description: "Identifer of subnet the instance resides in"
+    Description: "Identifier of subnet the instance resides in"
     Type: AWS::EC2::Subnet::Id
+  LaunchTemplateId:
+    Description: "Identifier of the EC2 Launch Template used when creating the Instance"
+    Type: String
   ImageId:
     Description: "ID of AMI used to launch instance"
     Type: AWS::EC2::Image::Id
@@ -288,14 +291,11 @@ Resources:
                 sudo pcs property set start-failure-is-fatal=true
                 sudo pcs property set cluster-recheck-interval=75s
     Properties:
-      KeyName: !Ref KeyPairName
-      InstanceType: !Ref InstanceType
-      IamInstanceProfile: !Ref ClusterProfile
-      SubnetId: !Ref SubnetId
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplateId
+        Version: 1
       SourceDestCheck: false
-      ImageId: !Ref ImageId
-      SecurityGroupIds:
-        - !Ref SecurityGroupId
+      SubnetId: !Ref SubnetId
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash

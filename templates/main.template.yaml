@@ -719,6 +719,26 @@ Resources:
       Path: /
       Roles:
         - !Ref ClusterRole
+
+  RHELwithHAInstanceLaunchTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateData:
+        DisableApiStop: false
+        DisableApiTermination: false
+        MaintenanceOptions:
+          AutoRecovery: disabled
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpTokens: required
+        KeyName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        IamInstanceProfile:
+          Arn: !GetAtt ClusterInstanceProfile.Arn
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupIds:
+        - !Ref ClusterSecurityGroup
+
   FirstNodeStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -728,6 +748,7 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
@@ -752,6 +773,7 @@ Resources:
         - Key: Node3Name
           Value: !If [Four, !Ref ExtraNode2Stack, None]
       Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
@@ -789,6 +811,7 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
@@ -809,6 +832,7 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
