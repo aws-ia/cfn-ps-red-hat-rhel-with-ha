@@ -719,6 +719,26 @@ Resources:
       Path: /
       Roles:
         - !Ref ClusterRole
+
+  RHELwithHAInstanceLaunchTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateData:
+        DisableApiStop: false
+        DisableApiTermination: false
+        MaintenanceOptions:
+          AutoRecovery: disabled
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpTokens: required
+        KeyName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+        IamInstanceProfile:
+          Arn: !GetAtt ClusterInstanceProfile.Arn
+        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
+        SecurityGroupIds:
+        - !Ref ClusterSecurityGroup
+
   FirstNodeStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -728,15 +748,46 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
         WaitHandle: !Ref WaitHandle
+
+  ExtraNode1Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: ThreeOrFour
+    DependsOn: FirstNodeStack
+    Properties:
+      TemplateURL:
+        !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
+        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+        ClusterPassword: !Ref ClusterPassword
+        ClusterRole: !Ref ClusterRole
+        WaitHandle: !Ref WaitHandle
+
+  ExtraNode2Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: Four
+    DependsOn: ExtraNode1Stack
+    Properties:
+      TemplateURL:
+        !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
+        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
+        ClusterPassword: !Ref ClusterPassword
+        ClusterRole: !Ref ClusterRole
+        WaitHandle: !Ref WaitHandle
+
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
     DependsOn: WaitCondition
@@ -752,14 +803,10 @@ Resources:
         - Key: Node3Name
           Value: !If [Four, !Ref ExtraNode2Stack, None]
       Parameters:
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
         FloatingIPAddress: !Ref FloatingIPAddress
         RouteTableId: !Join
           - ','
@@ -778,43 +825,3 @@ Resources:
           - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
             - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
             - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
-  ExtraNode1Stack:
-    Type: 'AWS::CloudFormation::Stack'
-    Condition: ThreeOrFour
-    DependsOn: FirstNodeStack
-    Properties:
-      TemplateURL:
-        !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
-        ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
-        WaitHandle: !Ref WaitHandle
-  ExtraNode2Stack:
-    Type: 'AWS::CloudFormation::Stack'
-    Condition: Four
-    DependsOn: ExtraNode1Stack
-    Properties:
-      TemplateURL:
-        !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
-        ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
-        WaitHandle: !Ref WaitHandle
