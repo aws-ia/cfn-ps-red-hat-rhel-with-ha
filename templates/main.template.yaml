@@ -753,6 +753,41 @@ Resources:
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
         WaitHandle: !Ref WaitHandle
+
+  ExtraNode1Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: ThreeOrFour
+    DependsOn: FirstNodeStack
+    Properties:
+      TemplateURL:
+        !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
+        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+        ClusterPassword: !Ref ClusterPassword
+        ClusterRole: !Ref ClusterRole
+        WaitHandle: !Ref WaitHandle
+
+  ExtraNode2Stack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: Four
+    DependsOn: ExtraNode1Stack
+    Properties:
+      TemplateURL:
+        !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
+        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Parameters:
+        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
+        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
+        ClusterPassword: !Ref ClusterPassword
+        ClusterRole: !Ref ClusterRole
+        WaitHandle: !Ref WaitHandle
+
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
     DependsOn: WaitCondition
@@ -790,35 +825,3 @@ Resources:
           - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
             - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
             - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
-  ExtraNode1Stack:
-    Type: 'AWS::CloudFormation::Stack'
-    Condition: ThreeOrFour
-    DependsOn: FirstNodeStack
-    Properties:
-      TemplateURL:
-        !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
-        ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
-        WaitHandle: !Ref WaitHandle
-  ExtraNode2Stack:
-    Type: 'AWS::CloudFormation::Stack'
-    Condition: Four
-    DependsOn: ExtraNode1Stack
-    Properties:
-      TemplateURL:
-        !Sub
-          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
-        ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
-        WaitHandle: !Ref WaitHandle
