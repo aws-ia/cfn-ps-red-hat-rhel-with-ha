@@ -636,7 +636,7 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - 'sts:AssumeRole'
-      Description: "Allows access to the S3 bucket"
+      Description: "RHEL with HA Partner Solution - EC2 Instance IAM Role to allow fencing and ssm agent usage"
       Path: /
       Policies:
         - PolicyName: root
