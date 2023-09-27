@@ -303,5 +303,7 @@ Resources:
             sudo pip3 install /tmp/aws-cfn-bootstrap-py3-latest.tar.gz
           fi
 
+          sudo dnf -y install https://s3.${AWS::Region}.amazonaws.com/amazon-ssm-${AWS::Region}/latest/linux_amd64/amazon-ssm-agent.rpm
+
           sudo aws configure set default.region "${AWS::Region}"
           sudo /usr/local/bin/cfn-init -v --stack "${AWS::StackName}" --resource "RHELwithHAInstance" --configsets setup --region "${AWS::Region}"
