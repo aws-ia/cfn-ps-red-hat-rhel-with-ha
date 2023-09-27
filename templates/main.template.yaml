@@ -624,9 +624,9 @@ Resources:
             - EIAMPolicyWildcardResource #Policy is architected for least privilege; EC2 instances must be able to interact with one another
     Properties:
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore # Used by amazon-ssm-agent
-        - arn:aws:iam::aws:policy/AmazonSSMDirectoryServiceAccess # Used by amazon-ssm-agent
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy # Used by amazon-ssm-agent
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore' # Used by amazon-ssm-agent
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMDirectoryServiceAccess' # Used by amazon-ssm-agent
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy' # Used by amazon-ssm-agent
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
