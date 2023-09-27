@@ -26,7 +26,7 @@ tests:
       AvailabilityZones: "$[taskcat_getaz_2]"
       NumberOfAZs: "2"
     regions:
-      - us-west-1
+      - us-east-2
   rhel9az2:
     template: ./templates/main.template.yaml
     parameters:
@@ -34,7 +34,7 @@ tests:
       AvailabilityZones: "$[taskcat_getaz_2]"
       NumberOfAZs: "2"
     regions:
-      - us-west-1
+      - us-east-2
   rhel8az3:
     template: ./templates/main.template.yaml
     parameters:
@@ -42,7 +42,7 @@ tests:
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
     regions:
-      - us-east-2
+      - us-west-2
   rhel9az3:
     template: ./templates/main.template.yaml
     parameters:
@@ -50,7 +50,7 @@ tests:
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
     regions:
-      - us-east-2
+      - us-west-2
   rhel8az4:
     template: ./templates/main.template.yaml
     parameters:
@@ -58,7 +58,7 @@ tests:
       AvailabilityZones: "$[taskcat_getaz_4]"
       NumberOfAZs: "4"
     regions:
-      - us-west-2
+      - us-east-1
   rhel9az4:
     template: ./templates/main.template.yaml
     parameters:
@@ -66,4 +66,4 @@ tests:
       AvailabilityZones: "$[taskcat_getaz_4]"
       NumberOfAZs: "4"
     regions:
-      - us-west-2
+      - us-east-1
