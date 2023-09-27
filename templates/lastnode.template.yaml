@@ -248,11 +248,17 @@ Resources:
               env:
                 CLUSTERPASSWORD: !Ref ClusterPassword
         service:
-          commands:
-            a_startservice:
-              command: "sudo systemctl start pcsd.service"
-            b_enableservice:
-              command: "sudo systemctl enable pcsd.service"
+          services:
+            systemd:
+              pcsd:
+                enabled: "true"
+                ensureRunning: "true"
+              nm-cloud-setup:
+                enabled: "false"
+                ensureRunning: "false"
+              nm-cloud-setup.timer:
+                enabled: "false"
+                ensureRunning: "false"
         cluster:
           commands:
             execute:
