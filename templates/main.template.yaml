@@ -749,14 +749,9 @@ Resources:
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
         WaitHandle: !Ref WaitHandle
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -774,14 +769,9 @@ Resources:
           Value: !If [Four, !Ref ExtraNode2Stack, None]
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
         FloatingIPAddress: !Ref FloatingIPAddress
         RouteTableId: !Join
           - ','
@@ -812,14 +802,9 @@ Resources:
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
         WaitHandle: !Ref WaitHandle
   ExtraNode2Stack:
     Type: 'AWS::CloudFormation::Stack'
@@ -833,12 +818,7 @@ Resources:
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        KeyPairName: !Ref KeyPairName
-        InstanceType: !Ref InstanceType
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
-        ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
-        SecurityGroupId: !GetAtt ClusterSecurityGroup.GroupId
         ClusterPassword: !Ref ClusterPassword
         ClusterRole: !Ref ClusterRole
-        ClusterProfile: !Ref ClusterInstanceProfile
         WaitHandle: !Ref WaitHandle
