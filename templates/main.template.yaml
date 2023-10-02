@@ -631,7 +631,7 @@ Resources:
       cfn-lint:
         config:
           ignore_checks:
-            - EIAMPolicyWildcardResource #Policy is architected for least privilege; EC2 instances must be able to interact with one another
+            - EIAMPolicyWildcardResource #Only until 'LastNodeStack' is deployed, limit to specific EC2 instances in 'LockdownClusterRolePolicyReboot' Resource
     Properties:
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore' # Used by amazon-ssm-agent
@@ -825,3 +825,43 @@ Resources:
           - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
             - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
             - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
+
+  LockdownClusterRolePolicyReboot:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref ClusterRole
+      PolicyName: reboot
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:StartInstances
+              - ec2:StopInstances
+              - ec2:RebootInstances
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
+              - ec2:DescribeTags
+              - ec2:DescribeRouteTables
+              - ec2:AssociateRouteTable
+              - ec2:DisassociateRouteTable
+              - ec2:ReplaceRouteTableAssociation
+              - ec2:AllocateAddress
+              - ec2:AssociateAddress
+              - ec2:DisassociateAddress
+              - ec2:ReleaseAddress
+              - ec2:AssignPrivateIpAddresses
+              - ec2:AttachNetworkInterface
+              - ec2:CreateNetworkInterface
+              - ec2:DeleteNetworkInterface
+              - ec2:DetachNetworkInterface
+              - ec2:ModifyNetworkInterfaceAttribute
+              - ec2:ResetNetworkInterfaceAttribute
+              - ec2:UnassignPrivateIpAddresses
+              - ec2:ModifyInstanceAttribute
+            Resource:
+              - !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId ]
+              - !If [ ThreeOrFour, !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt ExtraNode1Stack.Outputs.InstanceId ], !Ref AWS::NoValue ]
+              - !If [ Four, !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt ExtraNode2Stack.Outputs.InstanceId ], !Ref AWS::NoValue ]
+              - !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt LastNodeStack.Outputs.InstanceId ]

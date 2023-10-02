@@ -131,3 +131,10 @@ Resources:
 
           sudo aws configure set default.region "${AWS::Region}"
           sudo /usr/local/bin/cfn-init -v --stack "${AWS::StackName}" --resource "RHELwithHAInstance" --configsets setup --region "${AWS::Region}"
+Outputs:
+  InstanceId:
+    Description: Instance ID of the EC2 Instance
+    Value: !Ref RHELwithHAInstance
+  PrivateDnsName:
+    Description: PrivateDnsName of the EC2 Instance
+    Value: !GetAtt RHELwithHAInstance.PrivateDnsName
