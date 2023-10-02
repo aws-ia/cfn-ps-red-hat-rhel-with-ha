@@ -661,34 +661,22 @@ Resources:
                 Resource:
                   - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]
                   - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]  
-        - PolicyName: reboot
+        - PolicyName: NodeFencing
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeInstanceAttribute
+                  - ec2:DescribeTags
+                Resource: "*"
+              - Effect: Allow
+                Action:
                   - ec2:StartInstances
                   - ec2:StopInstances
                   - ec2:RebootInstances
-                  - ec2:DescribeInstances
-                  - ec2:DescribeInstanceStatus
-                  - ec2:DescribeTags
-                  - ec2:DescribeRouteTables
-                  - ec2:AssociateRouteTable
-                  - ec2:DisassociateRouteTable
-                  - ec2:ReplaceRouteTableAssociation
-                  - ec2:AllocateAddress
-                  - ec2:AssociateAddress
-                  - ec2:DisassociateAddress
-                  - ec2:ReleaseAddress
-                  - ec2:AssignPrivateIpAddresses
-                  - ec2:AttachNetworkInterface
-                  - ec2:CreateNetworkInterface
-                  - ec2:DeleteNetworkInterface
-                  - ec2:DetachNetworkInterface
-                  - ec2:ModifyNetworkInterfaceAttribute
-                  - ec2:ResetNetworkInterfaceAttribute
-                  - ec2:UnassignPrivateIpAddresses
                   - ec2:ModifyInstanceAttribute
                 Resource: "*"
 
@@ -697,15 +685,17 @@ Resources:
     Properties:
       Roles:
         - !Ref ClusterRole
-      PolicyName: routetable
+      PolicyName: OverlayIP
       PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
+                  - ec2:DescribeRouteTables
+                Resource: "*"
+              - Effect: Allow
+                Action:
                   - ec2:ReplaceRoute
-                  - ec2:DeleteRoute
-                  - ec2:CreateRoute
                 Resource:
                   - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
                   - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
@@ -831,34 +821,22 @@ Resources:
     Properties:
       Roles:
         - !Ref ClusterRole
-      PolicyName: reboot
+      PolicyName: NodeFencing
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
+              - ec2:DescribeInstanceAttribute
+              - ec2:DescribeTags
+            Resource: "*"
+          - Effect: Allow
+            Action:
               - ec2:StartInstances
               - ec2:StopInstances
               - ec2:RebootInstances
-              - ec2:DescribeInstances
-              - ec2:DescribeInstanceStatus
-              - ec2:DescribeTags
-              - ec2:DescribeRouteTables
-              - ec2:AssociateRouteTable
-              - ec2:DisassociateRouteTable
-              - ec2:ReplaceRouteTableAssociation
-              - ec2:AllocateAddress
-              - ec2:AssociateAddress
-              - ec2:DisassociateAddress
-              - ec2:ReleaseAddress
-              - ec2:AssignPrivateIpAddresses
-              - ec2:AttachNetworkInterface
-              - ec2:CreateNetworkInterface
-              - ec2:DeleteNetworkInterface
-              - ec2:DetachNetworkInterface
-              - ec2:ModifyNetworkInterfaceAttribute
-              - ec2:ResetNetworkInterfaceAttribute
-              - ec2:UnassignPrivateIpAddresses
               - ec2:ModifyInstanceAttribute
             Resource:
               - !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId ]
