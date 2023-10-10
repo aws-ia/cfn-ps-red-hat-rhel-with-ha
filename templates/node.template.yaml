@@ -5,14 +5,14 @@ Metadata:
   cfn-lint:
     config:
       ignore_checks:
-        - W4002
-        - W9002 #Template is not customer-facing
-        - W9003 #Template is not customer-facing
-        - W9004 #Template is not customer-facing
-        - W9006 #Template is not customer-facing
+        - W4002 # 'NoEcho' Parameter 'ClusterPassword' need to be used in 'metadata' section
+        - W9002 # Template only used in nested stack, initiated by main template, not directly customer-facing
+        - W9003 # Template only used in nested stack, initiated by main template, not directly customer-facing
+        - W9004 # Template only used in nested stack, initiated by main template, not directly customer-facing
+        - W9006 # Template only used in nested stack, initiated by main template, not directly customer-facing
 Parameters:
   SubnetId:
-    Description: "Identifer of subnet the instance resides in"
+    Description: "Identifier of subnet the instance resides in"
     Type: AWS::EC2::Subnet::Id
   LaunchTemplateId:
     Description: "Identifier of the EC2 Launch Template used when creating the Instance"
