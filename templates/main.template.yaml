@@ -631,7 +631,7 @@ Resources:
       cfn-lint:
         config:
           ignore_checks:
-            - EIAMPolicyWildcardResource #Policy is architected for least privilege; EC2 instances must be able to interact with one another
+            - EIAMPolicyWildcardResource #Only until 'LastNodeStack' is deployed, limit to specific EC2 instances in 'LockdownClusterRolePolicyReboot' Resource
     Properties:
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore' # Used by amazon-ssm-agent
@@ -649,46 +649,22 @@ Resources:
       Description: "RHEL with HA Partner Solution - EC2 Instance IAM Role to allow fencing and ssm agent usage"
       Path: /
       Policies:
-        - PolicyName: root
+        - PolicyName: NodeFencing
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - s3:ListBucket
-                  - s3:GetObject
-                  - s3:PutObject
-                Resource:
-                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]
-                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]  
-        - PolicyName: reboot
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeInstanceAttribute
+                  - ec2:DescribeTags
+                Resource: "*"
               - Effect: Allow
                 Action:
                   - ec2:StartInstances
                   - ec2:StopInstances
                   - ec2:RebootInstances
-                  - ec2:DescribeInstances
-                  - ec2:DescribeInstanceStatus
-                  - ec2:DescribeTags
-                  - ec2:DescribeRouteTables
-                  - ec2:AssociateRouteTable
-                  - ec2:DisassociateRouteTable
-                  - ec2:ReplaceRouteTableAssociation
-                  - ec2:AllocateAddress
-                  - ec2:AssociateAddress
-                  - ec2:DisassociateAddress
-                  - ec2:ReleaseAddress
-                  - ec2:AssignPrivateIpAddresses
-                  - ec2:AttachNetworkInterface
-                  - ec2:CreateNetworkInterface
-                  - ec2:DeleteNetworkInterface
-                  - ec2:DetachNetworkInterface
-                  - ec2:ModifyNetworkInterfaceAttribute
-                  - ec2:ResetNetworkInterfaceAttribute
-                  - ec2:UnassignPrivateIpAddresses
                   - ec2:ModifyInstanceAttribute
                 Resource: "*"
 
@@ -697,21 +673,23 @@ Resources:
     Properties:
       Roles:
         - !Ref ClusterRole
-      PolicyName: routetable
+      PolicyName: OverlayIP
       PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
+                  - ec2:DescribeRouteTables
+                Resource: "*"
+              - Effect: Allow
+                Action:
                   - ec2:ReplaceRoute
-                  - ec2:DeleteRoute
-                  - ec2:CreateRoute
                 Resource:
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
-                  - !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable]
-                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
-                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:*:*:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable]
+                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
+                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
 
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
@@ -751,7 +729,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         WaitHandle: !Ref WaitHandle
 
   ExtraNode1Stack:
@@ -768,7 +745,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         WaitHandle: !Ref WaitHandle
 
   ExtraNode2Stack:
@@ -785,7 +761,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         WaitHandle: !Ref WaitHandle
 
   LastNodeStack:
@@ -806,7 +781,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         FloatingIPAddress: !Ref FloatingIPAddress
         RouteTableId: !Join
           - ','
@@ -825,3 +799,31 @@ Resources:
           - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
             - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
             - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
+
+  LockdownClusterRolePolicyReboot:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref ClusterRole
+      PolicyName: NodeFencing
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
+              - ec2:DescribeInstanceAttribute
+              - ec2:DescribeTags
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ec2:StartInstances
+              - ec2:StopInstances
+              - ec2:RebootInstances
+              - ec2:ModifyInstanceAttribute
+            Resource:
+              - !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId ]
+              - !If [ ThreeOrFour, !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt ExtraNode1Stack.Outputs.InstanceId ], !Ref AWS::NoValue ]
+              - !If [ Four, !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt ExtraNode2Stack.Outputs.InstanceId ], !Ref AWS::NoValue ]
+              - !Sub [ "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}", InstanceId: !GetAtt LastNodeStack.Outputs.InstanceId ]
