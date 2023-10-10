@@ -23,6 +23,7 @@ Metadata:
           - NodeOS
           - FloatingIPAddress
           - ClusterPassword
+          - ClusterName
       - Label:
           default: AWS Partner Solution configuration
         Parameters:
@@ -62,6 +63,8 @@ Metadata:
         default: Partner Solution S3 Key Prefix
       VPCCIDR:
         default: VPC CIDR
+      ClusterName:
+        default: Internal RHEL with HA cluster name
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones to use for the subnets in the VPC. The logical order of
@@ -333,6 +336,12 @@ Parameters:
     ConstraintDescription: The QuickStart supports RHEL8 and RHEL9
     Description: Version of RHEL with HA OS to use for the node instances
     Default: 'RHELHA88HVM'
+    Type: String
+  ClusterName:
+    Default: newcluster
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The cluster name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA cluster, also used as part of the internal node name
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
@@ -799,6 +808,7 @@ Resources:
           - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
             - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
             - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
+        ClusterName: !Ref ClusterName
 
   LockdownClusterRolePolicyReboot:
     Type: AWS::IAM::Policy

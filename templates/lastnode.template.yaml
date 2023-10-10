@@ -38,6 +38,11 @@ Parameters:
   ClusterHostMap:
     Description: Semicolon separated list of all other cluster nodes in the format <hostname>:<instance_id>
     Type: String
+  ClusterName:
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The cluster name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA cluster, also used as part of the internal node name
+    Type: String
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -84,7 +89,7 @@ Resources:
                 echo "Instance Hostname: $EC2HOSTNAME"
 
                 sudo pcs host auth ${NodeHostnames} $EC2HOSTNAME -u hacluster -p ${ClusterPassword}
-                sudo pcs cluster setup newcluster ${NodeHostnames} $EC2HOSTNAME --force
+                sudo pcs cluster setup ${ClusterName} ${NodeHostnames} $EC2HOSTNAME --force
                 sudo pcs cluster start --all --wait
                 sudo pcs stonith create clusterfence fence_aws region=${AWS::Region} pcmk_host_map="${ClusterHostMap};$EC2HOSTNAME:$EC2INSTANCEID" power_timeout=240 pcmk_reboot_timeout=480 pcmk_reboot_retries=4 --force
                 sudo pcs resource create ha_listener ocf:heartbeat:aws-vpc-move-ip ip=${FloatingIPAddress} interface="eth0" routing_table=${RouteTableId} op monitor timeout="30s" interval="60s"
