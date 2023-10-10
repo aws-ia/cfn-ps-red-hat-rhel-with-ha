@@ -649,18 +649,6 @@ Resources:
       Description: "RHEL with HA Partner Solution - EC2 Instance IAM Role to allow fencing and ssm agent usage"
       Path: /
       Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:ListBucket
-                  - s3:GetObject
-                  - s3:PutObject
-                Resource:
-                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]
-                  - !Sub ['arn:${AWS::Partition}:s3:::${S3Bucket}', S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]]  
         - PolicyName: NodeFencing
           PolicyDocument:
             Version: "2012-10-17"
@@ -741,7 +729,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         WaitHandle: !Ref WaitHandle
 
   ExtraNode1Stack:
@@ -758,7 +745,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         WaitHandle: !Ref WaitHandle
 
   ExtraNode2Stack:
@@ -775,7 +761,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         WaitHandle: !Ref WaitHandle
 
   LastNodeStack:
@@ -796,7 +781,6 @@ Resources:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
         ClusterPassword: !Ref ClusterPassword
-        ClusterRole: !Ref ClusterRole
         FloatingIPAddress: !Ref FloatingIPAddress
         RouteTableId: !Join
           - ','

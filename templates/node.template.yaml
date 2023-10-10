@@ -23,19 +23,12 @@ Parameters:
     Description: Password used for the user HACluster in the RHEL HA setup
     Type: String
     NoEcho: true
-  ClusterRole:
-    Description: IAM Role for access to the S3 Buckets
-    Type: String
   WaitHandle:
     Type: String
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
     Metadata:
-      AWS::CloudFormation::Authentication:
-        S3AccessCreds:
-          type: S3
-          roleName: !Ref ClusterRole
       AWS::CloudFormation::Init:
         configSets:
           setup:

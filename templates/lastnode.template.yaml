@@ -23,9 +23,6 @@ Parameters:
     Description: Password used for the user HACluster in the RHEL HA setup
     Type: String
     NoEcho: true
-  ClusterRole:
-    Description: IAM Role for access to the S3 Buckets
-    Type: String
   FloatingIPAddress:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
     ConstraintDescription: IP Address must be in the form x.x.x.x
@@ -45,10 +42,6 @@ Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
     Metadata:
-      AWS::CloudFormation::Authentication:
-        S3AccessCreds:
-          type: S3
-          roleName: !Ref ClusterRole
       AWS::CloudFormation::Init:
         configSets:
           setup:
