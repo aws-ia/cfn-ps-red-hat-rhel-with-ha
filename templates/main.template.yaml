@@ -23,6 +23,11 @@ Metadata:
           - NodeOS
           - FloatingIPAddress
           - ClusterPassword
+          - ClusterName
+          - Node1Name
+          - Node2Name
+          - Node3Name
+          - Node4Name
       - Label:
           default: AWS Partner Solution configuration
         Parameters:
@@ -62,6 +67,16 @@ Metadata:
         default: Partner Solution S3 Key Prefix
       VPCCIDR:
         default: VPC CIDR
+      ClusterName:
+        default: Internal RHEL with HA cluster name
+      Node1Name:
+        default: Internal name for RHEL with HA cluster node 1
+      Node2Name:
+        default: Internal name for RHEL with HA cluster node 2
+      Node3Name:
+        default: Internal name for RHEL with HA cluster node 3
+      Node4Name:
+        default: Internal name for RHEL with HA cluster node 4
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones to use for the subnets in the VPC. The logical order of
@@ -333,6 +348,36 @@ Parameters:
     ConstraintDescription: The QuickStart supports RHEL8 and RHEL9
     Description: Version of RHEL with HA OS to use for the node instances
     Default: 'RHELHA88HVM'
+    Type: String
+  ClusterName:
+    Default: newcluster
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The cluster name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA cluster, also used as part of the internal node name
+    Type: String
+  Node1Name:
+    Default: node1
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 1
+    Type: String
+  Node2Name:
+    Default: node2
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 2
+    Type: String
+  Node3Name:
+    Default: node3
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 3
+    Type: String
+  Node4Name:
+    Default: node4
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 4
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
@@ -715,7 +760,7 @@ Resources:
           Arn: !GetAtt ClusterInstanceProfile.Arn
         ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", !Ref NodeOS]
         SecurityGroupIds:
-        - !Ref ClusterSecurityGroup
+          - !Ref ClusterSecurityGroup
 
   FirstNodeStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -725,11 +770,19 @@ Resources:
           - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Tags:
+        - Key: Name
+          Value:
+            !Sub
+              - ${NodeName}.${ClusterName}
+              - NodeName: !Ref Node1Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
+        ClusterName: !Ref ClusterName
+        NodeName: !Ref Node1Name
 
   ExtraNode1Stack:
     Type: 'AWS::CloudFormation::Stack'
@@ -738,14 +791,22 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
-        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
-          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
+          - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+            S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Tags:
+        - Key: Name
+          Value:
+            !Sub
+              - ${NodeName}.${ClusterName}
+              - NodeName: !Ref Node2Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
+        ClusterName: !Ref ClusterName
+        NodeName: !Ref Node2Name
 
   ExtraNode2Stack:
     Type: 'AWS::CloudFormation::Stack'
@@ -754,14 +815,22 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
-        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
-          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/node.template.yaml
+          - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+            S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Tags:
+        - Key: Name
+          Value:
+            !Sub
+              - ${NodeName}.${ClusterName}
+              - NodeName: !Ref Node3Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
+        ClusterName: !Ref ClusterName
+        NodeName: !Ref Node3Name
 
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -773,10 +842,11 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Tags:
-        - Key: Node2Name
-          Value: !If [ThreeOrFour, !Ref ExtraNode1Stack, None]
-        - Key: Node3Name
-          Value: !If [Four, !Ref ExtraNode2Stack, None]
+        - Key: Name
+          Value:
+            !Sub
+              - ${NodeName}.${ClusterName}
+              - NodeName: !If [ThreeOrFour, !Ref Node3Name, !If [Four, !Ref Node4Name, !Ref Node2Name]]
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
@@ -799,6 +869,8 @@ Resources:
           - - !Join [':', [ !GetAtt FirstNodeStack.Outputs.PrivateDnsName, !GetAtt FirstNodeStack.Outputs.InstanceId ] ]
             - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
             - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
+        ClusterName: !Ref ClusterName
+        NodeName: !If [ ThreeOrFour, !Ref Node3Name, !If [ Four, !Ref Node4Name, !Ref Node2Name ] ]
 
   LockdownClusterRolePolicyReboot:
     Type: AWS::IAM::Policy
