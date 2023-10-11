@@ -24,6 +24,10 @@ Metadata:
           - FloatingIPAddress
           - ClusterPassword
           - ClusterName
+          - Node1Name
+          - Node2Name
+          - Node3Name
+          - Node4Name
       - Label:
           default: AWS Partner Solution configuration
         Parameters:
@@ -65,6 +69,14 @@ Metadata:
         default: VPC CIDR
       ClusterName:
         default: Internal RHEL with HA cluster name
+      Node1Name:
+        default: Internal name for RHEL with HA cluster node 1
+      Node2Name:
+        default: Internal name for RHEL with HA cluster node 2
+      Node3Name:
+        default: Internal name for RHEL with HA cluster node 3
+      Node4Name:
+        default: Internal name for RHEL with HA cluster node 4
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones to use for the subnets in the VPC. The logical order of
@@ -342,6 +354,30 @@ Parameters:
     AllowedPattern: "^[0-9a-zA-Z]*$"
     ConstraintDescription: "The cluster name can include numbers, lowercase letters and uppercase letters."
     Description: Internal name of the RHEL with HA cluster, also used as part of the internal node name
+    Type: String
+  Node1Name:
+    Default: node1
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 1
+    Type: String
+  Node2Name:
+    Default: node2
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 2
+    Type: String
+  Node3Name:
+    Default: node3
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 3
+    Type: String
+  Node4Name:
+    Default: node4
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node 4
     Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
@@ -739,7 +775,7 @@ Resources:
           Value:
             !Sub
               - ${NodeName}.${ClusterName}
-              - NodeName: node1
+              - NodeName: !Ref Node1Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
@@ -761,7 +797,7 @@ Resources:
           Value:
             !Sub
               - ${NodeName}.${ClusterName}
-              - NodeName: node2
+              - NodeName: !Ref Node2Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
@@ -783,7 +819,7 @@ Resources:
           Value:
             !Sub
               - ${NodeName}.${ClusterName}
-              - NodeName: node3
+              - NodeName: !Ref Node3Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
@@ -804,7 +840,7 @@ Resources:
           Value:
             !Sub
               - ${NodeName}.${ClusterName}
-              - NodeName: !If [ThreeOrFour, node3, !If [Four, node4, node2]]
+              - NodeName: !If [ThreeOrFour, !Ref Node3Name, !If [Four, !Ref Node4Name, !Ref Node2Name]]
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
