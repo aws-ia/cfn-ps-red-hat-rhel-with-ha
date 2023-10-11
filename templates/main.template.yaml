@@ -781,6 +781,8 @@ Resources:
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
+        ClusterName: !Ref ClusterName
+        NodeName: !Ref Node1Name
 
   ExtraNode1Stack:
     Type: 'AWS::CloudFormation::Stack'
@@ -803,6 +805,8 @@ Resources:
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
+        ClusterName: !Ref ClusterName
+        NodeName: !Ref Node2Name
 
   ExtraNode2Stack:
     Type: 'AWS::CloudFormation::Stack'
@@ -825,6 +829,8 @@ Resources:
         SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
+        ClusterName: !Ref ClusterName
+        NodeName: !Ref Node3Name
 
   LastNodeStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -864,6 +870,7 @@ Resources:
             - !If [ ThreeOrFour, !Join [':', [ !GetAtt ExtraNode1Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode1Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
             - !If [ Four, !Join [':', [ !GetAtt ExtraNode2Stack.Outputs.PrivateDnsName, !GetAtt ExtraNode2Stack.Outputs.InstanceId ] ], !Ref AWS::NoValue ]
         ClusterName: !Ref ClusterName
+        NodeName: !If [ ThreeOrFour, !Ref Node3Name, !If [ Four, !Ref Node4Name, !Ref Node2Name ] ]
 
   LockdownClusterRolePolicyReboot:
     Type: AWS::IAM::Policy

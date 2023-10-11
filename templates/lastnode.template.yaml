@@ -43,6 +43,11 @@ Parameters:
     ConstraintDescription: "The cluster name can include numbers, lowercase letters and uppercase letters."
     Description: Internal name of the RHEL with HA cluster, also used as part of the internal node name
     Type: String
+  NodeName:
+    AllowedPattern: "^[0-9a-zA-Z]*$"
+    ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
+    Description: Internal name of the RHEL with HA node
+    Type: String
 Resources:
   RHELwithHAInstance:
     Type: AWS::EC2::Instance
@@ -126,6 +131,9 @@ Resources:
           fi
 
           sudo dnf -y install https://s3.${AWS::Region}.amazonaws.com/amazon-ssm-${AWS::Region}/latest/linux_amd64/amazon-ssm-agent.rpm
+
+          sudo sh -c 'echo "export NODENAME=${NodeName}.${ClusterName}" > /etc/profile.d/nodename.sh'
+          sudo sh -c "sed -i.bak 's/\\\u@\\\h/\\\u@\$NODENAME (\\\h)/g' /etc/bashrc"
 
           sudo aws configure set default.region "${AWS::Region}"
           sudo /usr/local/bin/cfn-init -v --stack "${AWS::StackName}" --resource "RHELwithHAInstance" --configsets setup --region "${AWS::Region}"
