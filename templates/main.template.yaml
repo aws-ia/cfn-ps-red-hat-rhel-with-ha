@@ -754,6 +754,7 @@ Resources:
         MetadataOptions:
           HttpEndpoint: enabled
           HttpTokens: required
+          InstanceMetadataTags: enabled
         KeyName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
         IamInstanceProfile:
