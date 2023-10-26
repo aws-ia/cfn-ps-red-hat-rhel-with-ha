@@ -13,12 +13,6 @@ project:
     ClusterPassword: "$[taskcat_genpass_8A]"
     RemoteAccessCIDR: "0.0.0.0/0"
 tests:
-  default:
-    template: ./templates/main.template.yaml
-    parameters:
-      NodeOS: "RHELHA88HVM"
-      AvailabilityZones: "$[taskcat_getaz_3]"
-      NumberOfAZs: "3"
   byovpc:
     template: ./templates/test.byovpc.yaml
     parameters:
