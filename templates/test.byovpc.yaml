@@ -196,7 +196,9 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        AvailabilityZones: !Ref AvailabilityZones
+        AvailabilityZones: !Join
+          - ','
+          - !Ref AvailabilityZones
         ClusterPassword: !Ref ClusterPassword
         NumberOfAZs: !Ref NumberOfAZs
         InstanceType: !Ref InstanceType
