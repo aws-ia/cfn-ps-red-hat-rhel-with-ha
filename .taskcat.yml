@@ -13,7 +13,7 @@ project:
     ClusterPassword: "$[taskcat_genpass_8A]"
     RemoteAccessCIDR: "0.0.0.0/0"
 tests:
-  byovpcaz2:
+  byovpc2az:
     template: ./templates/test.byovpc.yaml
     parameters:
       NodeOS: "RHELHA88HVM"
