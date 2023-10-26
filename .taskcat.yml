@@ -20,7 +20,7 @@ tests:
       AvailabilityZones: "$[taskcat_getaz_2]"
       NumberOfAZs: "2"
     regions:
-      - us-west-1
+      - us-east-1
   rhel8az2:
     template: ./templates/main.template.yaml
     parameters:
