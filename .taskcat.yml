@@ -19,6 +19,14 @@ tests:
       NodeOS: "RHELHA88HVM"
       AvailabilityZones: "$[taskcat_getaz_3]"
       NumberOfAZs: "3"
+  byovpc:
+    template: ./templates/test.byovpc.yaml
+    parameters:
+      NodeOS: "RHELHA88HVM"
+      AvailabilityZones: "$[taskcat_getaz_2]"
+      NumberOfAZs: "2"
+    regions:
+      - us-west-1
   rhel8az2:
     template: ./templates/main.template.yaml
     parameters:
