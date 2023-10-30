@@ -16,6 +16,21 @@ Metadata:
           - PrivateSubnet4CIDR
           - RemoteAccessCIDR
       - Label:
+          default: Optional network configuration for BYOVPC (Bring your own VPC)
+        Parameters:
+          - VPCID
+          - PublicSubnet1ID
+          - PublicSubnet2ID
+          - PrivateSubnet1ARouteTable
+          - PrivateSubnet2ARouteTable
+          - PrivateSubnet3ARouteTable
+          - PrivateSubnet4ARouteTable
+          - PublicSubnetRouteTable
+          - PrivateSubnet1AID
+          - PrivateSubnet2AID
+          - PrivateSubnet3AID
+          - PrivateSubnet4AID
+      - Label:
           default: Amazon EC2 configuration
         Parameters:
           - InstanceType
@@ -67,6 +82,30 @@ Metadata:
         default: Partner Solution S3 Key Prefix
       VPCCIDR:
         default: VPC CIDR
+      VPCID:
+        default: ID of VPC to be used
+      PublicSubnet1ID:
+        default: ID of Public Subnet 1
+      PublicSubnet2ID:
+        default: ID of Public Subnet 2
+      PrivateSubnet1ARouteTable:
+        default: ID of Private Subnet 1 routing table
+      PrivateSubnet2ARouteTable:
+        default: ID of Private Subnet 2 routing table
+      PrivateSubnet3ARouteTable:
+        default: ID of Private Subnet 3 routing table
+      PrivateSubnet4ARouteTable:
+        default: ID of Private Subnet 4 routing table
+      PublicSubnetRouteTable:
+        default: ID of Public Subnet routing table
+      PrivateSubnet1AID:
+        default: ID of Private Subnet 1
+      PrivateSubnet2AID:
+        default: ID of Private Subnet 2
+      PrivateSubnet3AID:
+        default: ID of Private Subnet 3
+      PrivateSubnet4AID:
+        default: ID of Private Subnet 4
       ClusterName:
         default: Internal RHEL with HA cluster name
       Node1Name:
@@ -379,11 +418,93 @@ Parameters:
     ConstraintDescription: "The node name can include numbers, lowercase letters and uppercase letters."
     Description: Internal name of the RHEL with HA node 4
     Type: String
+  VPCID:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The VPC ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing VPC. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PublicSubnet1ID:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Subnet ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Public Subnet 1. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PublicSubnet2ID:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Subnet ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Public Subnet 2. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet1ARouteTable:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Route Table ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 1 Routing Table. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet2ARouteTable:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Route Table ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 2 Routing Table. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet3ARouteTable:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Route Table ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 3 Routing Table. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet4ARouteTable:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Route Table ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 4 Routing Table. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PublicSubnetRouteTable:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Route Table ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Public Subnet Routing Table. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet1AID:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Subnet ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 1. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet2AID:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Subnet ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 2. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet3AID:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Subnet ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 3. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
+  PrivateSubnet4AID:
+    AllowedPattern: "^[0-9a-zA-Z-]*$"
+    ConstraintDescription: "The Subnet ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Description: "ID of existing Private Subnet 4. The ID can include numbers, lowercase letters, uppercase letters and hyphens (-)."
+    Default: ''
+    Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   Three:  !Equals [!Ref NumberOfAZs, "3"]
   Four:   !Equals [!Ref NumberOfAZs, "4"]
   ThreeOrFour: !Or [Condition: Three, Condition: Four]
+  CreateVPC:
+    !And
+      - !Equals ["", !Ref VPCID]
+      - !Equals ["", !Ref PublicSubnet1ID]
+      - !Equals ["", !Ref PublicSubnet2ID]
+      - !Equals ["", !Ref PrivateSubnet1ARouteTable]
+      - !Equals ["", !Ref PrivateSubnet2ARouteTable]
+      - !Equals ["", !Ref PublicSubnetRouteTable]
+      - !Equals ["", !Ref PrivateSubnet1AID]
+      - !Equals ["", !Ref PrivateSubnet2AID]
 Mappings:
   AWSAMIRegionMap:
     "us-east-1":
@@ -585,6 +706,7 @@ Mappings:
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
+    Condition: CreateVPC
     Properties:
       TemplateURL:
         !Sub
@@ -610,9 +732,9 @@ Resources:
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        VPCID: !GetAtt VPCStack.Outputs.VPCID
-        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        VPCID: !If [CreateVPC, !GetAtt VPCStack.Outputs.VPCID, !Ref VPCID]
+        PublicSubnet1ID: !If [CreateVPC, !GetAtt VPCStack.Outputs.PublicSubnet1ID, !Ref PublicSubnet1ID]
+        PublicSubnet2ID: !If [CreateVPC, !GetAtt VPCStack.Outputs.PublicSubnet2ID, !Ref PublicSubnet2ID]
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         KeyPairName: !Ref KeyPairName
         QSS3BucketName: !Ref QSS3BucketName
@@ -623,7 +745,6 @@ Resources:
     Type: 'AWS::CloudFormation::WaitConditionHandle'
   WaitCondition:
     Type: 'AWS::CloudFormation::WaitCondition'
-    DependsOn: VPCStack
     Properties:
       Handle: !Ref WaitHandle
       Count: !If [Four, 3, !If [Three, 2, 1]]
@@ -632,33 +753,33 @@ Resources:
   OverlayIPRoutePrivateSubnet1:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable
+      RouteTableId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable, !Ref PrivateSubnet1ARouteTable]
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
   OverlayIPRoutePrivateSubnet2:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
+      RouteTableId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable, !Ref PrivateSubnet2ARouteTable]
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
   OverlayIPRoutePrivateSubnet3:
     Type: AWS::EC2::Route
     Condition: ThreeOrFour
     Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable
+      RouteTableId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref PrivateSubnet3ARouteTable]
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
   OverlayIPRoutePrivateSubnet4:
     Type: AWS::EC2::Route
     Condition: Four
     Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable
+      RouteTableId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref PrivateSubnet4ARouteTable]
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
   OverlayIPRoutePublicSubnet:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable
+      RouteTableId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PublicSubnetRouteTable, !Ref PublicSubnetRouteTable]
       DestinationCidrBlock: !Sub '${FloatingIPAddress}/32'
       InstanceId: !GetAtt FirstNodeStack.Outputs.InstanceId
 
@@ -666,7 +787,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: 'Sets up inbound rule for communication among nodes'
-      VpcId: !GetAtt VPCStack.Outputs.VPCID 
+      VpcId: !If [CreateVPC, !GetAtt VPCStack.Outputs.VPCID, !Ref VPCID]
       SecurityGroupIngress:
         - IpProtocol: '-1'
           CidrIp: !Ref VPCCIDR
@@ -730,11 +851,11 @@ Resources:
                 Action:
                   - ec2:ReplaceRoute
                 Resource:
-                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PublicSubnetRouteTable]
-                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable]
-                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable]
-                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
-                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !If [CreateVPC, !GetAtt VPCStack.Outputs.PublicSubnetRouteTable, !Ref PublicSubnetRouteTable]]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable, !Ref PrivateSubnet1ARouteTable]]
+                  - !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable, !Ref PrivateSubnet2ARouteTable]]
+                  - !If [ThreeOrFour, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref PrivateSubnet3ARouteTable]], !Ref AWS::NoValue]
+                  - !If [Four, !Sub ["arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/${RouteTableID}", RouteTableID: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref PrivateSubnet4ARouteTable]], !Ref AWS::NoValue]
 
   ClusterInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
@@ -779,7 +900,7 @@ Resources:
               - NodeName: !Ref Node1Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
+        SubnetId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet1AID, !Ref PrivateSubnet1AID]
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
         ClusterName: !Ref ClusterName
@@ -803,7 +924,7 @@ Resources:
               - NodeName: !Ref Node2Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+        SubnetId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet3AID, !Ref PrivateSubnet3AID]
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
         ClusterName: !Ref ClusterName
@@ -827,7 +948,7 @@ Resources:
               - NodeName: !Ref Node3Name
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet4AID
+        SubnetId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet4AID, !Ref PrivateSubnet4AID]
         ClusterPassword: !Ref ClusterPassword
         WaitHandle: !Ref WaitHandle
         ClusterName: !Ref ClusterName
@@ -850,16 +971,16 @@ Resources:
               - NodeName: !If [ThreeOrFour, !Ref Node3Name, !If [Four, !Ref Node4Name, !Ref Node2Name]]
       Parameters:
         LaunchTemplateId: !Ref RHELwithHAInstanceLaunchTemplate
-        SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
+        SubnetId: !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet2AID, !Ref PrivateSubnet2AID]
         ClusterPassword: !Ref ClusterPassword
         FloatingIPAddress: !Ref FloatingIPAddress
         RouteTableId: !Join
           - ','
-          - - !GetAtt VPCStack.Outputs.PublicSubnetRouteTable
-            - !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable
-            - !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable
-            - !If [ThreeOrFour, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref AWS::NoValue]
-            - !If [Four, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref AWS::NoValue]
+          - - !If [CreateVPC, !GetAtt VPCStack.Outputs.PublicSubnetRouteTable, !Ref PublicSubnetRouteTable]
+            - !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet1ARouteTable, !Ref PrivateSubnet1ARouteTable]
+            - !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet2ARouteTable, !Ref PrivateSubnet2ARouteTable]
+            - !If [ThreeOrFour, !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet3ARouteTable, !Ref PrivateSubnet3ARouteTable], !Ref AWS::NoValue]
+            - !If [Four, !If [CreateVPC, !GetAtt VPCStack.Outputs.PrivateSubnet4ARouteTable, !Ref PrivateSubnet4ARouteTable], !Ref AWS::NoValue]
         NodeHostnames: !Join
           - ' '
           - - !GetAtt FirstNodeStack.Outputs.PrivateDnsName
