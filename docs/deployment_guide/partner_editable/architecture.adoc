@@ -1,29 +1,22 @@
 :xrefstyle: short
 
-Deploying this Partner Solution with default parameters builds the following RHEL with HA APN environment in the
-AWS Cloud.
-
-// Replace this example diagram with your own. Follow our wiki guidelines: https://w.amazon.com/bin/view/AWS_Quick_Starts/Process_for_PSAs/#HPrepareyourarchitecturediagram. Upload your source PowerPoint file to the GitHub {deployment name}/docs/images/ directory in its repository.
+Deploying this Partner Solution with default parameters builds the following {partner-product-short-name} environment on AWS.
 
 [#architecture1]
-.Partner Solution architecture for RHEL with HA APN on AWS
-image::../docs/deployment_guide/images/architecture_diagram.png[Architecture]
+.RHEL with HA Partner Solution architecture: 3 availability zones, redundant bastion hosts
+image::../docs/deployment_guide/images/cfn-ps-red-hat-rhel-with-ha-architecture-diagram.png[Architecture]
 
-As shown in <<architecture1>>, this Partner Solution sets up the following:
+This solution sets up the following:
 
-* A highly available architecture that spans four Availability Zones.*
-* A virtual private cloud (VPC) configured with public and private subnets, according to AWS
-best practices, to provide you with your own virtual network on AWS.*
+* A high available RHEL HA cluster on AWS that spans across multiple Availability Zones.
+* (Optional) A virtual private cloud (VPC) configured with public and private subnets.
 * In the public subnets:
-** Managed network address translation (NAT) gateways to allow outbound
-internet access for resources in the private subnets.*
-** A Linux bastion host in an Auto Scaling group to allow inbound Secure
-Shell (SSH) access to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.*
+** (Optional) A managed network address translation (NAT) gateway. This allows outbound internet access for resources in the private subnet.
+** Redundant Linux bastion hosts in an Auto Scaling group. They allow inbound Secure Shell (SSH) access to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.
 * In the private subnets:
-** Primary, secondary, tertiary, and quaternary HA nodes held within their own applications instances held within their own availability zones.
-// Add bullet points for any additional components that are included in the deployment. Ensure that the additional components are shown in the architecture diagram. End each bullet with a period.
-* A Route Table to automate failover.
-* A Fencing Agent configured to isolate any malfunctioning nodes.
+** RHEL HA cluster nodes on EC2.
+** (Optional) Routing tables used by the public and private subnets.
+*** The RHEL HA cluster updates the routing when then Overlay IP address moves to another node.
+** (Optional) A Internet gateway to provide internet access to instances in the public subnets.
 
-
-[.small]#* The template that deploys this Partner Solution into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
+[.small]#The solution can be customized (e.g. amount of cluster nodes / availability zones) and provides options to deploy into an existing or a new VPC.#
