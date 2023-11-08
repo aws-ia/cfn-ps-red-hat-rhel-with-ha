@@ -245,3 +245,7 @@ taskcat_outputs/*
 .taskcat_overrides.yml
 .taskcat
 .taskcat/
+
+# Docs excludes
+index.html
+prod_example.html
