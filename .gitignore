@@ -247,5 +247,4 @@ taskcat_outputs/*
 .taskcat/
 
 # Docs excludes
-index.html
 prod_example.html
