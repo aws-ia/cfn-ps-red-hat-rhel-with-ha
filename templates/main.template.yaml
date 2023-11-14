@@ -363,7 +363,7 @@ Parameters:
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Partner Solution bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Default: aws-ia-us-east-1
+    Default: aws-ia
     Description: "S3 bucket name for the Partner Solution assets. Partner Solution bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: String
   QSS3BucketRegion:
@@ -491,7 +491,7 @@ Parameters:
     Default: ''
     Type: String
 Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-ia']
   Three:  !Equals [!Ref NumberOfAZs, "3"]
   Four:   !Equals [!Ref NumberOfAZs, "4"]
   ThreeOrFour: !Or [Condition: Three, Condition: Four]
