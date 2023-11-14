@@ -163,7 +163,7 @@ Parameters:
     Type: String
 
 Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-ia']
   Three:  !Equals [!Ref NumberOfAZs, "3"]
   Four:   !Equals [!Ref NumberOfAZs, "4"]
   ThreeOrFour: !Or [Condition: Three, Condition: Four]
